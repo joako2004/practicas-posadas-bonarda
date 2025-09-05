@@ -1,0 +1,66 @@
+# Entornos virtuales
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Variables de entorno y configuración sensible
+.env
+.env.local
+.env.production
+.env.staging
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# Sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs y temporales
+*.log
+logs/
+*.tmp
+*.temp
+
+# Base de datos locales
+*.db
+*.sqlite3
+local.db
+
+# Archivos de respaldo
+*~
+*.bak
+*.swp
+*.swo
