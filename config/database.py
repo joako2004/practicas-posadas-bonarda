@@ -24,10 +24,10 @@ def validate_database_config(config):
     """
     Valida que todas las configuraciones requeridas esten presentes
     """
-    required_fields = ['host', 'databse', 'user', 'password', 'port']
+    required_fields = ['host', 'database', 'user', 'password', 'port']
     missing_fields = []
     
-    for field in missing_fields:
+    for field in required_fields:
         if not config.get(field):
             missing_fields.append(field.upper())
     
@@ -112,7 +112,7 @@ def connect_postgresql():
         
         # Obtener y validar configuración
         config = get_database_config()
-        is_valid, validation_message = validate_database_config()
+        is_valid, validation_message = validate_database_config(config)
         
         if not is_valid:
             logger.error(f"❌ Configuración inválida: {validation_message}")
@@ -140,7 +140,7 @@ def connect_postgresql():
             return None, None
         
         # Conectar a la base de datos específica
-        logger.info(f'Conectando a la base de datos "{config['database']}"...')
+        logger.info(f'Conectando a la base de datos "{config["database"]}"...')
         connection = psycopg2.connect(**config)
         
         # Crear cursor para ejecutar consultas
@@ -152,9 +152,9 @@ def connect_postgresql():
         logger.info("✅ Conexión exitosa a PostgreSQL")
         logger.info(f"Versión del servidor: {version[0]}")
         
-        log_database_connection(True, f'- Connected to "{config['database']}"')
+        log_database_connection(True, f'- Connected to "{config["database"]}"')
         
-        return connection, cursor()
+        return connection, cursor
         
     except (Exception, Error) as error:
         logger.error(f"Error al conectar con PostgreSQL: {error}", exc_info=True)
@@ -172,7 +172,7 @@ def connect_postgresql():
 
 def verify_active_connection(connection):
     """
-    Verifica si la conezión a la base de datos está activa
+    Verifica si la conexión a la base de datos está activa
     """
     if connection is None:
         logger.warning('Conexión es None, considerada inactiva')
@@ -640,4 +640,3 @@ def test_environment_setup():
         logger.error("❌ Problemas con la configuración del entorno")
         return False
 
-test_environment_setup()
