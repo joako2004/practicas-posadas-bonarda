@@ -1,6 +1,7 @@
 # ==========================================
-# config/database.py - Conexión PostgreSQL con configuración local
+# config/database.py - Conexión PostgreSQL con variables de entorno
 # ==========================================
+import os
 import psycopg2
 from psycopg2 import Error
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -8,16 +9,44 @@ from logging_config import *
 
 def get_database_config():
     """
-    Configuración local de la base de datos para desarrollo
-    Modifica estos valores según tu configuración local
+    Configuración de base de datos usando variables de entorno
+    Valores por defecto para desarrollo local
     """
     return {
-        'host': 'localhost',
-        'database': 'posada_db',
-        'user': 'postgres',
-        'password': 'Joako2004@', 
-        'port': '5432'
+        'host': os.getenv('DB_HOST', 'localhost'),
+        'database': os.getenv('DB_NAME', 'posada_db'),
+        'user': os.getenv('DB_USER', 'postgres'),
+        'password': os.getenv('DB_PASSWORD'), 
+        'port': os.getenv('DB_PORT', '5432')
     }
+
+def validate_database_config(config):
+    """
+    Valida que todas las configuraciones requeridas esten presentes
+    """
+    required_fields = ['host', 'databse', 'user', 'password', 'port']
+    missing_fields = []
+    
+    for field in missing_fields:
+        if not config.get(field):
+            missing_fields.append(field.upper())
+    
+    if missing_fields:
+        error_msg = f"❌ Variables de entorno faltantes: {', '.join(missing_fields)}"
+        logger.error(error_msg)
+        return False, error_msg
+    
+    # Validar que el puerto sea numérico
+    try:
+        int(config['port'])
+    except ValueError:
+        error_msg = "❌ DB_PORT debe ser un número válido"
+        logger.error(error_msg)
+        return False, error_msg
+    
+    logger.info("✅ Configuración de base de datos validada correctamente")
+    return True, "Configuración válida"
+
 
 def verify_and_create_database(host, user, password, port, database_name):
     """
@@ -81,8 +110,24 @@ def connect_postgresql():
     try:
         logger.info("🔗 Iniciando proceso de conexión a PostgreSQL")
         
-        # Paso 1: Verificar y crear base de datos si no existe
-        logger.info("Verificando existencia de la base de datos...")
+        # Obtener y validar configuración
+        config = get_database_config()
+        is_valid, validation_message = validate_database_config()
+        
+        if not is_valid:
+            logger.error(f"❌ Configuración inválida: {validation_message}")
+            return None, None
+        
+        # Log de configuración 
+        logger.info(f"📋 Configuración cargada:")
+        logger.info(f"   - Host: {config['host']}")
+        logger.info(f"   - Database: {config['database']}")
+        logger.info(f"   - User: {config['user']}")
+        logger.info(f"   - Port: {config['port']}")
+        logger.info(f"   - Password: {'*' * len(config['password']) if config['password'] else 'NOT SET'}")            
+        
+        # Verificar y crear la base de datos si no existe
+        logger.info('Verificando existencia de la base de datos...')
         if not verify_and_create_database(
             config['host'], 
             config['user'], 
@@ -90,30 +135,39 @@ def connect_postgresql():
             config['port'], 
             config['database']
         ):
-            logger.error("No se pudo verificar/crear la base de datos")
-            log_database_connection(False, "- Database verification failed")
+            logger.error('No se pudo verificar/crear la base de datos')
+            log_database_connection(False, '- Database verification failed')
             return None, None
         
-        # Paso 2: Conectar a la base de datos específica
-        logger.info(f"Conectando a la base de datos '{config['database']}'...")
+        # Conectar a la base de datos específica
+        logger.info(f'Conectando a la base de datos "{config['database']}"...')
         connection = psycopg2.connect(**config)
         
         # Crear cursor para ejecutar consultas
         cursor = connection.cursor()
         
         # Verificar la conexión
-        cursor.execute("SELECT version();")
+        cursor.execute('SELECT version();')
         version = cursor.fetchone()
         logger.info("✅ Conexión exitosa a PostgreSQL")
         logger.info(f"Versión del servidor: {version[0]}")
         
-        log_database_connection(True, f"- Connected to '{config['database']}'")
+        log_database_connection(True, f'- Connected to "{config['database']}"')
         
-        return connection, cursor
+        return connection, cursor()
         
     except (Exception, Error) as error:
         logger.error(f"Error al conectar con PostgreSQL: {error}", exc_info=True)
         log_database_connection(False, f"- Connection error: {error}")
+        
+        # Ayuda específica para errores comunes
+        if "authentication failed" in str(error).lower():
+            logger.error("💡 Verifica que DB_PASSWORD esté configurado correctamente")
+        elif "connection refused" in str(error).lower():
+            logger.error("💡 Verifica que DB_HOST y DB_PORT sean correctos")
+        elif "database" in str(error).lower() and "does not exist" in str(error).lower():
+            logger.error("💡 Verifica que DB_NAME sea correcto")
+            
         return None, None
 
 def verify_active_connection(connection):
@@ -131,6 +185,7 @@ def verify_active_connection(connection):
         temp_cursor.close()
         logger.debug('Verificación de conexión exitosa')
         return True
+    
     except (Exception, Error) as error:
         logger.warning(f'Conexión inactiva detectada: {error}')
         return False
@@ -545,3 +600,44 @@ def get_connection_stats():
         
     finally:
         close_connection(conn, cur)
+
+def get_environment_info():
+    """
+    NUEVA FUNCIÓN: Información sobre el entorno actual
+    """
+    
+    env_info = {
+        'environment': os.getenv('ENVIRONMENT', 'development'),
+        'db_host': os.getenv('DB_HOST', 'localhost'),
+        'db_name': os.getenv('DB_NAME', 'posada_db'),
+        'db_user': os.getenv('DB_USER', 'postgres'),
+        'db_port': os.getenv('DB_PORT', '5432'),
+        'password_configured': bool(os.getenv('DB_PASSWORD')),
+        'python_version': os.sys.version,
+        'working_directory': os.getcwd()
+    }
+    
+    logger.info("🌍 Información del entorno:")
+    for key, value in env_info.items():
+        logger.info(f'  -{key}: {value}')
+    
+    return env_info
+
+# Función auxiliar para debugging
+def test_environment_setup():
+    """
+    NUEVA FUNCIÓN: Prueba la configuración del entorno
+    """
+    logger.info("🧪 Probando configuración del entorno...")
+    
+    config = get_database_config()
+    is_valid, message = validate_database_config(config)
+    
+    if is_valid:
+        logger.info("✅ Configuración del entorno correcta")
+        return True
+    else:
+        logger.error("❌ Problemas con la configuración del entorno")
+        return False
+
+test_environment_setup()
