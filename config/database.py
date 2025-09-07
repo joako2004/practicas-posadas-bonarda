@@ -189,4 +189,359 @@ def execute_query(cursor, query, params=None):
         logger.error(f"Consulta fallida: {query}")
         return None
 
-# todo: una vez que tenga la base de datos armada, crear los métodos para crear tablas e insertar datos
+def insert_data(cursor, connection, table, data, columns=None):
+    """
+    Inserta datos en una tabla y retorna el ID del registro creado
+    """
+    try:
+        if columns:
+            placeholders = ', '.join(['%s'] * len(data))
+            columns_str = ', '.join(columns)
+            query = f'INSERT INTO {table} ({columns_str}) VALUES ({placeholders}) RETURNING id'
+        else:
+            query = f'INSERT INTO {table} (nombre, apellido, dni, email, telefono, cantidad_personas) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id'
+        
+        logger.debug(f'Ejecutando inserción en tabla "{table}": {query}')
+        cursor.execute(query, data)
+        new_id = cursor.fetchone()[0]  # Obtener el ID antes del commit
+        connection.commit()
+
+        logger.info(f"✅ Datos insertados correctamente en tabla '{table}' con ID: {new_id}")
+        return new_id
+    
+    except Error as error:
+        logger.error(f"❌ Error insertando datos en tabla '{table}': {error}", exc_info=True)
+        connection.rollback()
+        logger.warning("⚠️ Transacción revertida debido al error")
+        return False
+
+def create_default_rooms(cursor, connection):
+    """
+    Crea las 4 habitaciones de la posda si no existen
+    """
+    try:
+        logger.info('🏠 Inicializando habitaciones por defecto...')
+        
+        # Verificar si ya existen habitaciones
+        cursor.execute('SELECT COUNT(*) FROM habitaciones')
+        existing_rooms = cursor.fetchone()[0]
+        
+        if existing_rooms == 0:
+            habitaciones_data = [
+                (1, 'Habitación 1'),
+                (2, 'Habitación 2'),
+                (3, 'Habitación 3'),
+                (4, 'Habitación 4')
+            ]
+        
+            for numero, descripcion in habitaciones_data:
+                cursor.execute(
+                    'INSERT INTO habitaciones (numero, descripcion) VALUES (%s, %s)',
+                    (numero, descripcion)
+                )
+            
+            connection.commit()
+            logger.info(f"✅ Se crearon {len(habitaciones_data)} habitaciones por defecto")
+        else:
+            logger.info(f"ℹ️ Ya existen {existing_rooms} habitaciones en el sistema")
+        
+        return True
+    
+    except Error as error:
+        logger.error(f"❌ Error creando habitaciones por defecto: {error}", exc_info=True)    
+        connection.rollback()
+        return False
+
+def create_posada_tables(cursor, connection):
+    """
+    Crea todas las tablas necesarias para el sistema
+    """
+    tables = {
+        'usuarios': """
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id SERIAL PRIMARY KEY,
+            nombre VARCHAR(100) NOT NULL,
+            apellido VARCHAR(100) NOT NULL,
+            dni VARCHAR(20) UNIQUE NOT NULL,
+            email VARCHAR(100) UNIQUE NOT NULL,
+            telefono VARCHAR(20),
+            cantidad_personas INTEGER NOT NULL DEFAULT 1,
+            fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            activo BOOLEAN DEFAULT TRUE
+        )
+        """,
+        
+        'habitaciones': """
+        CREATE TABLE IF NOT EXISTS habitaciones (
+            id SERIAL PRIMARY KEY,
+            numero INTEGER UNIQUE NOT NULL CHECK (numero BETWEEN 1 AND 4),
+            descripcion VARCHAR(255) DEFAULT 'Habitación estándar de la posada',
+            disponible BOOLEAN DEFAULT TRUE,
+            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """,
+        
+        'precios': """
+        CREATE TABLE IF NOT EXISTS precios (
+            id SERIAL PRIMARY KEY,
+            precio_por_noche DECIMAL(10,2) NOT NULL CHECK (precio_por_noche > 0),
+            fecha_vigencia_desde DATE NOT NULL,
+            fecha_vigencia_hasta DATE,
+            activo BOOLEAN DEFAULT TRUE,
+            descripcion TEXT,
+            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT check_fechas_validas CHECK (
+                fecha_vigencia_hasta IS NULL OR 
+                fecha_vigencia_hasta >= fecha_vigencia_desde
+            )
+        )
+        """,
+        
+        'reservas': """
+        CREATE TABLE IF NOT EXISTS reservas (
+            id SERIAL PRIMARY KEY,
+            usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+            fecha_check_in DATE NOT NULL,
+            fecha_check_out DATE NOT NULL,
+            cantidad_habitaciones INTEGER NOT NULL DEFAULT 1 CHECK (cantidad_habitaciones BETWEEN 1 AND 4),
+            precio_total DECIMAL(10,2) NOT NULL CHECK (precio_total >= 0),
+            estado VARCHAR(20) NOT NULL DEFAULT 'pendiente' 
+                CHECK (estado IN ('pendiente', 'confirmada', 'cancelada', 'finalizada')),
+            observaciones TEXT,
+            fecha_reserva TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT check_fechas_checkin_checkout CHECK (fecha_check_out > fecha_check_in)
+        )
+        """,
+        
+        'reserva_habitaciones': """
+        CREATE TABLE IF NOT EXISTS reserva_habitaciones (
+            id SERIAL PRIMARY KEY,
+            reserva_id INTEGER NOT NULL REFERENCES reservas(id) ON DELETE CASCADE,
+            habitacion_id INTEGER NOT NULL REFERENCES habitaciones(id) ON DELETE RESTRICT,
+            fecha_asignacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(reserva_id, habitacion_id)
+        )
+        """,
+        
+        'pagos': """
+        CREATE TABLE IF NOT EXISTS pagos (
+            id SERIAL PRIMARY KEY,
+            reserva_id INTEGER NOT NULL REFERENCES reservas(id) ON DELETE CASCADE,
+            tipo_pago VARCHAR(20) NOT NULL 
+                CHECK (tipo_pago IN ('seña', 'pago_completo')),
+            monto DECIMAL(10,2) NOT NULL CHECK (monto > 0),
+            metodo_pago VARCHAR(20) NOT NULL 
+                CHECK (metodo_pago IN ('efectivo', 'transferencia', 'tarjeta_debito', 'tarjeta_credito')),
+            estado_pago VARCHAR(15) NOT NULL DEFAULT 'pendiente'
+                CHECK (estado_pago IN ('pendiente', 'pagado', 'reembolsado')),
+            fecha_pago TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            comprobante VARCHAR(255),
+            observaciones TEXT
+        )
+        """
+    }
+    
+    logger.info("🏗️ Iniciando creación de tablas del sistema de posada...")
+    created_tables = 0
+
+    try:
+        for table_name, sql in tables.items():
+            logger.debug(f'Creando tabla {table_name}')
+            cursor.execute(sql)
+            created_tables += 1
+            logger.debug(f'✅ Tabla "{table_name}" procesada correctamente')
+        
+        connection.commit()
+        logger.info(f"✅ Todas las tablas del sistema creadas/verificadas exitosamente ({created_tables} tablas)")
+        
+        # Crear las 4 habitaciones si no existen
+        if create_default_rooms(cursor, connection):
+            logger.info('✅ Habitaciones por defecto inicializadas')
+        
+        return True
+    
+    except Error as error:
+        logger.error(f"❌ Error creando tablas del sistema: {error}", exc_info=True)
+        connection.rollback()
+        return False
+
+def create_default_price(cursor, connection, precio_inicial=50000.00):
+    """
+    Crea un precio inicial por defecto si no existe ningún precio activo
+    """
+    try:
+        logger.info("💰 Verificando precios por defecto...")
+        
+        cursor.execute("SELECT COUNT(*) FROM precios WHERE activo = TRUE")
+        active_prices = cursor.fetchone()[0]
+        
+        if active_prices == 0:
+            cursor.execute("""
+                INSERT INTO precios (precio_por_noche, fecha_vigencia_desde, descripcion)
+                VALUES (%s, CURRENT_DATE, %s)
+            """, (precio_inicial, "Precio inicial del sistema"))
+            connection.commit()
+            logger.info(f"✅ Precio inicial creado: ${precio_inicial} por noche")
+        else:
+            logger.info(f"ℹ️ Ya existen {active_prices} precios activos")
+            
+        return True
+    except Error as error:
+        logger.error(f"❌ Error creando precio: {error}", exc_info=True)
+        connection.rollback()
+        return False
+
+def initialize_posada_system(cursor, connection):
+    """
+    Inicializa completamente el sistema de la posada:
+    - Crea todas las tablas
+    - Inicializa habitaciones
+    - Crea precio por defecto
+    """
+    logger.info("🚀 Inicializando sistema completo de la posada...")
+    
+    try:
+        # Paso 1: Crear todas las tablas
+        if not create_posada_tables(cursor, connection):
+            logger.error("❌ Falló la creación de tablas")
+            return False
+        
+        # Paso 2: Crear precio por defecto
+        if not create_default_price(cursor, connection):
+            logger.error("❌ Falló la creación del precio por defecto")
+            return False
+        
+        logger.info("🎉 Sistema de posada inicializado correctamente")
+        logger.info("📋 Resumen del sistema:")
+        logger.info("   - ✅ 6 tablas creadas (usuarios, habitaciones, reservas, etc.)")
+        logger.info("   - ✅ 4 habitaciones inicializadas")
+        logger.info("   - ✅ Precio por defecto establecido")
+        logger.info("   - ✅ Restricciones y validaciones aplicadas")
+        
+        return True
+        
+    except Exception as error:
+        logger.error(f"❌ Error en inicialización del sistema: {error}", exc_info=True)
+        return False
+
+# Funciones auxiliares para operaciones específicas del sistema
+
+def insert_usuario(cursor, connection, nombre, apellido, dni, email, telefono, cantidad_personas):
+    """
+    Inserta un nuevo usuario con validaciones específicas
+    """
+    try:
+        data = (nombre, apellido, dni, email, telefono, cantidad_personas)
+        columns = ['nombre', 'apellido', 'dni', 'email', 'telefono', 'cantidad_personas']
+        
+        return insert_data(cursor, connection, 'usuarios', data, columns)
+        
+    except Exception as error:
+        logger.error(f"❌ Error insertando usuario: {error}")
+        return False
+
+def insert_reserva(cursor, connection, usuario_id, fecha_check_in, fecha_check_out, 
+                  cantidad_habitaciones, precio_total, observaciones=""):
+    """
+    Inserta una nueva reserva - VERSIÓN CORREGIDA
+    """
+    try:
+        # ✅ Inserción directa con RETURNING - MÁS SEGURA
+        cursor.execute("""
+            INSERT INTO reservas (usuario_id, fecha_check_in, fecha_check_out, 
+                                cantidad_habitaciones, precio_total, observaciones)
+            VALUES (%s, %s, %s, %s, %s, %s) 
+            RETURNING id
+        """, (usuario_id, fecha_check_in, fecha_check_out, cantidad_habitaciones, 
+              precio_total, observaciones))
+        
+        reserva_id = cursor.fetchone()[0]  # ✅ ID correcto garantizado
+        connection.commit()
+        
+        logger.info(f"✅ Reserva creada con ID: {reserva_id}")
+        return reserva_id
+        
+    except Exception as error:
+        connection.rollback()
+        logger.error(f"❌ Error insertando reserva: {error}")
+        return False
+
+def insert_pago(cursor, connection, reserva_id, tipo_pago, monto, metodo_pago, comprobante=""):
+    """
+    Inserta un nuevo pago para una reserva
+    """
+    try:
+        data = (reserva_id, tipo_pago, monto, metodo_pago, 'pagado', comprobante)
+        columns = ['reserva_id', 'tipo_pago', 'monto', 'metodo_pago', 'estado_pago', 'comprobante']
+        
+        return insert_data(cursor, connection, 'pagos', data, columns)
+        
+    except Exception as error:
+        logger.error(f"❌ Error insertando pago: {error}")
+        return False
+
+def close_connection(connection, cursor):
+    """
+    Cierra la conexión a la base de datos de forma segura
+    """
+    try:
+        if cursor:
+            cursor.close()
+            logger.debug("Cursor cerrado exitosamente")
+        if connection:
+            connection.close()
+            logger.info("🔌 Conexión a base de datos cerrada exitosamente")
+            log_database_connection(True, "- Connection closed safely")
+        
+        logger.info("Recursos de base de datos liberados correctamente")
+        
+    except Error as error:
+        logger.warning(f"⚠️ Error cerrando conexión: {error}")
+        log_database_connection(False, f"- Close error: {error}")
+
+def get_connection_stats():
+    """
+    Función utilitaria para obtener estadísticas de la base de datos
+    """
+    conn, cur = connect_postgresql()
+    
+    if not conn or not cur:
+        logger.error("No se pudo obtener estadísticas - conexión fallida")
+        return None
+    
+    try:
+        # Obtener información de la base de datos
+        stats = {}
+        
+        # Versión de PostgreSQL
+        cur.execute("SELECT version()")
+        stats['version'] = cur.fetchone()[0]
+        
+        # Número de conexiones activas
+        cur.execute("SELECT count(*) FROM pg_stat_activity")
+        stats['active_connections'] = cur.fetchone()[0]
+        
+        # Tamaño de la base de datos
+        cur.execute("SELECT pg_size_pretty(pg_database_size(current_database()))")
+        stats['database_size'] = cur.fetchone()[0]
+        
+        # Estadísticas específicas del sistema de posada
+        cur.execute("SELECT COUNT(*) FROM usuarios WHERE activo = TRUE")
+        stats['usuarios_activos'] = cur.fetchone()[0]
+        
+        cur.execute("SELECT COUNT(*) FROM reservas")
+        stats['total_reservas'] = cur.fetchone()[0]
+        
+        cur.execute("SELECT COUNT(*) FROM habitaciones WHERE disponible = TRUE")
+        stats['habitaciones_disponibles'] = cur.fetchone()[0]
+        
+        logger.info(f"📊 Estadísticas de base de datos obtenidas: {stats}")
+        return stats
+        
+    except Error as error:
+        logger.error(f"❌ Error obteniendo estadísticas: {error}")
+        return None
+        
+    finally:
+        close_connection(conn, cur)
