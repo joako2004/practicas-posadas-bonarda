@@ -339,16 +339,7 @@ def create_posada_tables(cursor, connection):
         'precios': """
         CREATE TABLE IF NOT EXISTS precios (
             id SERIAL PRIMARY KEY,
-            precio_por_noche DECIMAL(10,2) NOT NULL CHECK (precio_por_noche > 0),
-            fecha_vigencia_desde DATE NOT NULL,
-            fecha_vigencia_hasta DATE,
-            activo BOOLEAN DEFAULT TRUE,
-            descripcion TEXT,
-            fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            CONSTRAINT check_fechas_validas CHECK (
-                fecha_vigencia_hasta IS NULL OR 
-                fecha_vigencia_hasta >= fecha_vigencia_desde
-            )
+            precio_por_noche DECIMAL(10,2) NOT NULL CHECK (precio_por_noche > 0)
         )
         """,
         
