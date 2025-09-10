@@ -352,11 +352,7 @@ def create_posada_tables(cursor, connection):
             cantidad_habitaciones INTEGER NOT NULL DEFAULT 1 CHECK (cantidad_habitaciones BETWEEN 1 AND 4),
             precio_total DECIMAL(10,2) NOT NULL CHECK (precio_total >= 0),
             estado VARCHAR(20) NOT NULL DEFAULT 'pendiente' 
-                CHECK (estado IN ('pendiente', 'confirmada', 'cancelada', 'finalizada')),
-            observaciones TEXT,
-            fecha_reserva TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            fecha_modificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            CONSTRAINT check_fechas_checkin_checkout CHECK (fecha_check_out > fecha_check_in)
+                CHECK (estado IN ('pendiente', 'confirmada', 'cancelada', 'finalizada')),            
         )
         """,
         
