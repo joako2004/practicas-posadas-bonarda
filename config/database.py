@@ -610,8 +610,10 @@ def get_environment_info():
     
     return env_info
 
-# Función auxiliar para debugging
+#! Función auxiliar para debugging
 def test_environment_setup():
+    from dotenv import load_dotenv
+    load_dotenv()   
     """
     NUEVA FUNCIÓN: Prueba la configuración del entorno
     """
@@ -627,3 +629,5 @@ def test_environment_setup():
         logger.error("❌ Problemas con la configuración del entorno")
         return False
 
+
+test_environment_setup()
