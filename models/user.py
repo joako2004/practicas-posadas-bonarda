@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr
 from datetime import datetime
-from typing import Optional
 
 class UserBase(BaseModel):
     nombre: str = Field(..., min_length=2)
@@ -8,10 +7,10 @@ class UserBase(BaseModel):
     dni: str = Field(..., min_length=7)
     email: EmailStr
     telefono: str
-    cantidad_personas: int = Field(..., ge=1)
+    # cantidad_personas eliminado
 
 class UserCreate(UserBase):
-    pass  # igual a UserBase, pero separado por claridad
+    password: str  # se agrega porque en el registro sí lo necesitás
 
 class UserInDB(UserBase):
     id: int
@@ -19,7 +18,9 @@ class UserInDB(UserBase):
     activo: bool = True
 
     class Config:
-        from_attributes = True  # permite mapear desde ORM si usás SQLAlchemy
+        from_attributes = True  
 
-class UserResponse(UserInDB):
-    pass
+class UserResponse(UserBase):
+    id: int
+    fecha_registro: datetime
+    activo: bool
