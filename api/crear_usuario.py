@@ -11,6 +11,7 @@ async def crear_usuario(
     nombre: str = Form(...),
     apellido: str = Form(...),
     dni: str = Form(...),
+    cuil_cuit: str = Form(...),
     email: EmailStr = Form(...),
     telefono: str = Form(...),
     password: str = Form(...,)
@@ -19,6 +20,7 @@ async def crear_usuario(
         nombre=nombre,
         apellido=apellido,
         dni=dni,
+        cuil_cuit=cuil_cuit,
         email=email,
         telefono=telefono,
         password=password

@@ -5,6 +5,7 @@ class UserBase(BaseModel):
     nombre: str = Field(..., min_length=2)
     apellido: str = Field(..., min_length=2)
     dni: str = Field(..., min_length=7)
+    cuil_cuit: str = Field(..., min_length=11, max_length=13)
     email: EmailStr = Field(...,)
     telefono: str = Field(...,)
     # cantidad_personas eliminado

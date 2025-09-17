@@ -52,6 +52,7 @@ def create_posada_tables(cursor, connection):
             nombre VARCHAR(100) NOT NULL,
             apellido VARCHAR(100) NOT NULL,
             dni VARCHAR(20) UNIQUE NOT NULL,
+            cuil_cuit VARCHAR(13) UNIQUE NOT NULL,
             email VARCHAR(100) UNIQUE NOT NULL,
             telefono VARCHAR(20),
             password VARCHAR(255) NOT NULL,
@@ -148,6 +149,16 @@ def create_posada_tables(cursor, connection):
             logger.info('✅ Columna password verificada/agregada en tabla usuarios')
         except Error as error:
             logger.error(f"❌ Error agregando columna password: {error}", exc_info=True)
+            connection.rollback()
+            return False
+
+        # Asegurar que la columna cuil_cuit existe en usuarios
+        try:
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS cuil_cuit VARCHAR(13) UNIQUE")
+            connection.commit()
+            logger.info('✅ Columna cuil_cuit verificada/agregada en tabla usuarios')
+        except Error as error:
+            logger.error(f"❌ Error agregando columna cuil_cuit: {error}", exc_info=True)
             connection.rollback()
             return False
 

@@ -64,13 +64,14 @@ def insert_usuario(user_data):
             return False
         
         cursor.execute("""
-            INSERT INTO usuarios (nombre, apellido, dni, email, telefono, password) 
-            VALUES (%s, %s, %s, %s, %s, %s) 
+            INSERT INTO usuarios (nombre, apellido, dni, cuil_cuit, email, telefono, password)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
             RETURNING id
         """, (
             user_data.nombre,
-            user_data.apellido, 
+            user_data.apellido,
             user_data.dni,
+            user_data.cuil_cuit,
             user_data.email,
             user_data.telefono,
             user_data.password
