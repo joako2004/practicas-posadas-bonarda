@@ -6,6 +6,10 @@ load_dotenv()  # carga las variables desde el archivo .env
 
 app = FastAPI()
 
+@app.get("/")
+def root():
+    return {'Mensaje': 'API funcionando correctamente'}
+
 # Servir carpeta pubil como estáticos
 app.mount("/static", StaticFiles(directory='public'), name='static')
 
