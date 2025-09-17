@@ -54,7 +54,7 @@ def create_posada_tables(cursor, connection):
             dni VARCHAR(20) UNIQUE NOT NULL,
             email VARCHAR(100) UNIQUE NOT NULL,
             telefono VARCHAR(20),
-            cantidad_personas INTEGER NOT NULL DEFAULT 1,
+            password VARCHAR(255) NOT NULL,
             fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             activo BOOLEAN DEFAULT TRUE
         )
@@ -140,6 +140,16 @@ def create_posada_tables(cursor, connection):
         # Crear las 4 habitaciones si no existen
         if create_default_rooms(cursor, connection):
             logger.info('✅ Habitaciones por defecto inicializadas')
+
+        # Asegurar que la columna password existe en usuarios
+        try:
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS password VARCHAR(255) NOT NULL DEFAULT 'temp_password'")
+            connection.commit()
+            logger.info('✅ Columna password verificada/agregada en tabla usuarios')
+        except Error as error:
+            logger.error(f"❌ Error agregando columna password: {error}", exc_info=True)
+            connection.rollback()
+            return False
 
         return True
 

@@ -35,7 +35,7 @@ def insert_data(cursor, connection, table, data, columns=None):
             columns_str = ', '.join(columns)
             query = f'INSERT INTO {table} ({columns_str}) VALUES ({placeholders}) RETURNING id'
         else:
-            query = f'INSERT INTO {table} (nombre, apellido, dni, email, telefono, cantidad_personas) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id'
+            query = f'INSERT INTO {table} (nombre, apellido, dni, email, telefono) VALUES (%s, %s, %s, %s, %s) RETURNING id'
 
         logger.debug(f'Ejecutando inserción en tabla "{table}": {query}')
         cursor.execute(query, data)
@@ -53,19 +53,42 @@ def insert_data(cursor, connection, table, data, columns=None):
 
 # Funciones auxiliares para operaciones específicas del sistema
 
-def insert_usuario(cursor, connection, nombre, apellido, dni, email, telefono, cantidad_personas):
-    """
-    Inserta un nuevo usuario con validaciones específicas
-    """
+def insert_usuario(user_data):
+    """Inserta un nuevo usuario usando el objeto UserCreate"""
     try:
-        data = (nombre, apellido, dni, email, telefono, cantidad_personas)
-        columns = ['nombre', 'apellido', 'dni', 'email', 'telefono', 'cantidad_personas']
-
-        return insert_data(cursor, connection, 'usuarios', data, columns)
-
+        from .database_connection import connect_postgresql, close_connection
+        
+        connection, cursor = connect_postgresql()
+        if not connection or not cursor:
+            logger.error("No se pudo conectar a la base de datos")
+            return False
+        
+        cursor.execute("""
+            INSERT INTO usuarios (nombre, apellido, dni, email, telefono, password) 
+            VALUES (%s, %s, %s, %s, %s, %s) 
+            RETURNING id
+        """, (
+            user_data.nombre,
+            user_data.apellido, 
+            user_data.dni,
+            user_data.email,
+            user_data.telefono,
+            user_data.password
+        ))
+        
+        user_id = cursor.fetchone()[0]
+        connection.commit()
+        logger.info(f"Usuario creado con ID: {user_id}")
+        return user_id
+        
     except Exception as error:
-        logger.error(f"❌ Error insertando usuario: {error}")
+        logger.error(f"Error insertando usuario: {error}")
+        if 'connection' in locals() and connection:
+            connection.rollback()
         return False
+    finally:
+        if 'connection' in locals() and 'cursor' in locals():
+            close_connection(connection, cursor)
 
 def insert_reserva(cursor, connection, usuario_id, fecha_check_in, fecha_check_out,
                   cantidad_habitaciones, precio_total, observaciones=""):

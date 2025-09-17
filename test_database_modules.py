@@ -284,15 +284,16 @@ def test_operations(connection, cursor):
 
         # Test insert_usuario
         print("2. Testing insert_usuario()...")
-        test_user_id = insert_usuario(
-            cursor, connection,
+        from models.user import UserCreate
+        user_data = UserCreate(
             nombre="Test User",
             apellido="Test Lastname",
             dni="12345678",
             email="test@example.com",
             telefono="123456789",
-            cantidad_personas=2
+            password="testpassword123"
         )
+        test_user_id = insert_usuario(user_data)
         if test_user_id:
             print(f"   ✅ User inserted successfully with ID: {test_user_id}")
         else:
