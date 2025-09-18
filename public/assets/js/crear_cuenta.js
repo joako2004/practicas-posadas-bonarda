@@ -1,3 +1,4 @@
+// verificar que la contraseña y verificar contraseña sean iguales
 document.querySelector('.registration-form').addEventListener('submit', function(e) {
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
