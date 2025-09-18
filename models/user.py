@@ -7,7 +7,7 @@ class UserBase(BaseModel):
     dni: str = Field(..., min_length=7)
     cuil_cuit: str = Field(..., min_length=11, max_length=13)
     email: EmailStr = Field(...,)
-    telefono: str = Field(...,)
+    telefono: str = Field(..., min_length=10)
     # cantidad_personas eliminado
 
 class UserCreate(UserBase):

@@ -12,4 +12,4 @@ async def show_register_form(request: Request):
     """
     return templates.TemplateResponse("crear_usuario.html", {"request": request})
 
-# http://127.0.0.1:8000/autenticar_creacion_usuario/registrar
+#http://127.0.0.1:8000/autenticar_creacion_usuario/registrar
