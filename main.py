@@ -11,6 +11,10 @@ app = FastAPI()
 def root():
     return FileResponse("public/pages/home/home.html")
 
+@app.get("/crear_usuario")
+def crear_usuario_page():
+    return FileResponse("public/pages/crear_usuario/crear_usuario.html")
+
 app.mount("/static", StaticFiles(directory='public'), name='static')
 
 app.include_router(crear_usuario.router, prefix="/usuarios", tags=["Usuarios"]) # crear el usuario en la base de datos
