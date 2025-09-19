@@ -1,5 +1,6 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from api import crear_usuario, autenticar_creacion_usuario
 from dotenv import load_dotenv
 load_dotenv()  # carga las variables desde el archivo .env
@@ -8,7 +9,7 @@ app = FastAPI()
 
 @app.get("/")
 def root():
-    return {'Mensaje': 'API funcionando correctamente'}
+    return FileResponse("public/pages/home/home.html")
 
 app.mount("/static", StaticFiles(directory='public'), name='static')
 
