@@ -76,8 +76,11 @@ def insert_usuario(user_data):
             user_data.telefono,
             user_data.password
         ))
-        
-        user_id = cursor.fetchone()[0]
+
+        result = cursor.fetchone()
+        if result is None:
+            raise ValueError("No se pudo obtener el ID del usuario insertado")
+        user_id = result[0]
         connection.commit()
         logger.info(f"Usuario creado con ID: {user_id}")
         return user_id
