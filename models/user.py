@@ -5,7 +5,7 @@ import re
 class UserBase(BaseModel):
     nombre: str = Field(..., min_length=2)
     apellido: str = Field(..., min_length=2)
-    dni: str = Field(..., min_length=7, max_length=8)  # DNI argentino 7-8 dígitos
+    dni: str = Field(..., min_length=7, max_length=8)
     cuil_cuit: str = Field(..., min_length=11, max_length=13)
     email: EmailStr = Field(...)
     telefono: str = Field(..., min_length=8, max_length=15)
@@ -34,19 +34,22 @@ class UserBase(BaseModel):
         return v
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=8)
+    password: str = Field(..., min_length=8, max_length=72)  # Agregado max_length
     
     @field_validator('password')
     @classmethod
     def validar_password(cls, v):
+        if len(v) > 72:
+            raise ValueError('La contraseña debe tener menos de 72 caracteres')
         if len(v) < 8:
             raise ValueError('La contraseña debe tener al menos 8 caracteres')
         if not re.search(r'[A-Z]', v):
             raise ValueError('La contraseña debe contener al menos una mayúscula')
         if not re.search(r'[a-z]', v):
             raise ValueError('La contraseña debe contener al menos una minúscula')
-        if not re.search(r'\d', v):
-            raise ValueError('La contraseña debe contener al menos un número')
+        # Comentado para permitir contraseñas sin números
+        # if not re.search(r'\d', v):
+        #     raise ValueError('La contraseña debe contener al menos un número')
         return v
 
 class UserInDB(UserBase):
