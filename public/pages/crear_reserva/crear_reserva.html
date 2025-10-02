@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva - Posada</title>
+    <link rel="stylesheet" href="/public/assets/css/crear_reserva.css">
+</head>
+<body>
+
+    <header>
+        <h1>Gestión de Reservas de la Posada</h1>
+        <button id="logout-btn">Cerrar Sesión</button>
+    </header>
+
+    <main>
+        <!-- sección para mostrar reservas existentes -->
+         <section id="reservas-list">
+            <h2>Tus Reservas</h2>
+            <p id="no-reservas">No tienes reservas aún.</p>
+            <ul id="reservas"></ul>
+         </section>
+
+         <!-- Formulario para nueva reserva -->
+          <section id="nueva-reserva">
+            <h2>Crear Nueva Reserva</h2>
+            <form action="" id="reserva-form">
+                <label for="fecha_entrada">Fecha de Entrada:</label>
+                <input type="date" name="fecha_entrada" id="fecha_entrada" required><br>
+
+                <label for="fecha_salida">Fecha de Salida</label>
+                <input type="date" name="fecha_salida" id="fecha_salida" required><br>
+
+                <label for="huespedes">Cantidad de huéspedes</label>
+                <input type="number" name="huespedes" id="huespedes" required><br>
+
+                <label for="contacto">Correo de Contacto</label>
+                <input type="email" name="contacto" id="contacto" required><br>
+
+                <button type="submit">Enviar Reserva</button>
+            </form>
+          </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/public/assets/js/crear_reserva.js"></script>
+</body>
+</html>
