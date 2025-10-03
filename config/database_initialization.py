@@ -87,7 +87,7 @@ def create_posada_tables(cursor, connection):
             id SERIAL PRIMARY KEY,
             usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
             fecha_check_in DATE NOT NULL,
-            fecha_check_out DATE NOT NULL,
+            fecha_check_out DATE NOT NULL CHECK (fecha_check_out > fecha_check_in + INTERVAL '1 day'),
             cantidad_habitaciones INTEGER NOT NULL DEFAULT 1 CHECK (cantidad_habitaciones BETWEEN 1 AND 4),
             precio_total DECIMAL(10,2) NOT NULL CHECK (precio_total >= 0),
             estado VARCHAR(20) NOT NULL DEFAULT 'pendiente'
