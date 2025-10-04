@@ -3,7 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from api import crear_usuario, autenticar_creacion_usuario, reservas  # Añadir reservas
+from api import crear_usuario, autenticar_creacion_usuario, reservas, login
 from dotenv import load_dotenv
 load_dotenv()  # Carga las variables desde el archivo .env
 
@@ -49,4 +49,5 @@ app.mount("/static", StaticFiles(directory='public'), name='static')
 # Incluir routers
 app.include_router(crear_usuario.router, prefix="/usuarios", tags=["Usuarios"])
 app.include_router(autenticar_creacion_usuario.router, prefix="/autenticar_creacion_usuario", tags=["Autenticación"])
-app.include_router(reservas.router, prefix="/api", tags=["Reservas"])  # Añadir reservas
+app.include_router(reservas.router, prefix="/api", tags=["Reservas"])
+app.include_router(login.router, prefix="/api", tags=["Autenticación"])

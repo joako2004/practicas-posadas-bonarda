@@ -63,6 +63,24 @@
                         </div>
                         
                         <button type="submit" class="submit-btn">CREAR CUENTA</button>
+                        
+                        <button type="button" class="submit-btn" onclick="window.location.href='/autenticar_creacion_usuario/login'">YA TENGO CUENTA</button>
+                    </form>
+                    
+                </div>
+                
+                <div class="form-card login-form" style="display: none;">
+                    <h1>INICIAR SESIÓN</h1>
+                    <form id="login-form">
+                        <div class="field-group">
+                            <label for="login-dni">DNI</label>
+                            <input type="text" id="login-dni" name="login-dni" required>
+                        </div>
+                        <div class="field-group">
+                            <label for="login-password">Contraseña</label>
+                            <input type="password" id="login-password" name="login-password" required>
+                        </div>
+                        <button type="submit" class="submit-btn">INICIAR SESIÓN</button>
                     </form>
                 </div>
             </div>
