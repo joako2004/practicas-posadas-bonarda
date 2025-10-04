@@ -1,108 +1,48 @@
+document.addEventListener('DOMContentLoaded', async function() {
+    const token = localStorage.getItem('token');
+    const reservasList = document.getElementById('reservas');
+    const noReservasMsg = document.getElementById('no-reservas');
 
-// Verificar si el usuario está autenticado
-const token = localStorage.getItem('token');
-if (!token) {
-    window.location.href = 'crear_usuario.html'; // Redirigir si no hay token
-}
-
-// Botón de cerrar sesión
-const logoutBtn = document.getElementById('logout-btn');
-if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('token');
-        window.location.href = 'crear_usuario.html';
-    });
-}
-
-// Formatear fechas para mostrar
-const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('es-ES', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    });
-};
-
-// Cargar reservas existentes
-async function cargarReservas() {
-    const lista = document.getElementById('reservas');
-    const noReservas = document.getElementById('no-reservas');
-    if (!lista || !noReservas) {
-        console.error('Elementos del DOM no encontrados');
+    if (!token) {
+        // No token, perhaps show message or redirect
+        noReservasMsg.textContent = 'Debes iniciar sesión para ver tus reservas.';
+        noReservasMsg.style.display = 'block';
         return;
     }
 
     try {
-        noReservas.textContent = 'Cargando reservas...';
-        const res = await axios.get('/api/reservas', {
-            headers: { Authorization: `Bearer ${token}` }
+        const response = await fetch('/api/reservas', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
         });
-        const reservas = res.data;
+
+        if (!response.ok) {
+            throw new Error('Error al obtener reservas');
+        }
+
+        const reservas = await response.json();
 
         if (reservas.length === 0) {
-            noReservas.style.display = 'block';
-            noReservas.textContent = 'No tienes reservas aún.';
-            lista.innerHTML = '';
+            noReservasMsg.style.display = 'block';
+            reservasList.style.display = 'none';
         } else {
-            noReservas.style.display = 'none';
-            let html = '';
-            reservas.forEach(r => {
-                html += `<li>Reserva del ${formatDate(r.fecha_entrada)} al ${formatDate(r.fecha_salida)} - ${r.huespedes} huéspedes</li>`;
+            noReservasMsg.style.display = 'none';
+            reservasList.style.display = 'block';
+            reservasList.innerHTML = ''; // Clear any existing
+
+            reservas.forEach(reserva => {
+                const li = document.createElement('li');
+                li.textContent = `ID: ${reserva.id}, Fechas: ${reserva.fecha_check_in} a ${reserva.fecha_check_out}, Habitaciones: ${reserva.cantidad_habitaciones}, Estado: ${reserva.estado}, Precio: $${reserva.precio_total}`;
+                reservasList.appendChild(li);
             });
-            lista.innerHTML = html;
         }
-    } catch (err) {
-        console.error('Error cargando reservas:', err);
-        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-            localStorage.removeItem('token');
-            window.location.href = 'crear_usuario.html';
-            return;
-        }
-        noReservas.style.display = 'block';
-        noReservas.textContent = 'Error al cargar reservas.';
+    } catch (error) {
+        console.error('Error fetching reservations:', error);
+        noReservasMsg.textContent = 'Error al cargar reservas. Intenta de nuevo.';
+        noReservasMsg.style.display = 'block';
+        reservasList.style.display = 'none';
     }
-}
-cargarReservas();
-
-// Manejar submit del formulario
-const form = document.getElementById('reserva-form');
-if (form) {
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData);
-
-        // Validación de fechas
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        if (new Date(data.fecha_entrada) < hoy) {
-            alert('La fecha de entrada no puede ser anterior a hoy.');
-            return;
-        }
-        if (new Date(data.fecha_salida) <= new Date(data.fecha_entrada)) {
-            alert('La fecha de salida debe ser posterior a la fecha de entrada.');
-            return;
-        }
-
-        try {
-            await axios.post('/api/reservas', data, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            alert('Reserva enviada. La administración te contactará vía WhatsApp.');
-            cargarReservas(); // Recargar lista
-            e.target.reset(); // Limpiar formulario
-        } catch (err) {
-            console.error('Error enviando reserva:', err);
-            let errorMsg = 'Error al enviar la reserva. Intenta de nuevo.';
-            if (err.response && err.response.data.error) {
-                errorMsg = err.response.data.error;
-            }
-            if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-                localStorage.removeItem('token');
-                window.location.href = 'crear_usuario.html';
-                return;
-            }
-            alert(errorMsg);
-        }
-    });
-}
+});

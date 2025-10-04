@@ -6,7 +6,7 @@ class UserBase(BaseModel):
     nombre: str = Field(..., min_length=2)
     apellido: str = Field(..., min_length=2)
     dni: str = Field(..., min_length=7, max_length=8)
-    cuil_cuit: str = Field(..., min_length=11, max_length=13)
+    cuil_cuit: str = Field(..., min_length=10, max_length=13)
     email: EmailStr = Field(...)
     telefono: str = Field(..., min_length=8, max_length=15)
     
@@ -21,8 +21,8 @@ class UserBase(BaseModel):
     @classmethod
     def validar_cuil_cuit(cls, v):
         cuil_limpio = v.replace('-', '').replace(' ', '')
-        if not cuil_limpio.isdigit() or len(cuil_limpio) != 11:
-            raise ValueError('CUIL/CUIT debe tener 11 dígitos (XX-XXXXXXXX-X)')
+        if not cuil_limpio.isdigit() or len(cuil_limpio) < 10 or len(cuil_limpio) > 13:
+            raise ValueError('CUIL/CUIT debe tener entre 10 y 13 dígitos')
         return v
     
     @field_validator('telefono')

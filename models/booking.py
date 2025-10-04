@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, model_validator
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from decimal import Decimal
 from enum import Enum
 
@@ -12,14 +12,16 @@ class Estado(str, Enum):
 
 class BookingBase(BaseModel):
     usuario_id: int = Field(..., ge=0)
-    fecha_check_in: datetime
-    fecha_check_out: datetime
+    fecha_check_in: date
+    fecha_check_out: date
     cantidad_habitaciones: int = Field(..., ge=1)
 
     @model_validator(mode="after")
     def validate_date(self):
         if self.fecha_check_in >= self.fecha_check_out:
             raise ValueError("La fecha de check-out debe ser posterior a la de check-in")
+        if (self.fecha_check_out - self.fecha_check_in).days < 2:
+            raise ValueError("La reserva debe ser por al menos dos noches")
         return self
 
 
