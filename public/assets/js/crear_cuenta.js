@@ -1,19 +1,7 @@
-// verificar que la contraseña y verificar contraseña sean iguales
-document.querySelector('.registration-form').addEventListener('submit', function(e) {
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
-    
-    if (password !== confirmPassword) {
-        e.preventDefault();
-        alert('Las contraseñas no coinciden');
-        return false;
-    }
-});
-
 document.querySelector('.registration-form').addEventListener('submit', async function(e) {
-    e.preventDefault();  // Evita submit tradicional
+    e.preventDefault(); // Evita submit tradicional
 
-    // Verifica contraseñas coinciden (ya lo tienes)
+    // Verifica contraseñas coinciden
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
     if (password !== confirmPassword) {
@@ -66,34 +54,51 @@ document.querySelector('.registration-form').addEventListener('submit', async fu
     };
 
     try {
-        const response = await fetch('/usuarios/crear', {  // Endpoint de tu backend
+        // Crear usuario
+        const response = await fetch('/usuarios/crear', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)  // Envía como JSON
+            body: JSON.stringify(data)
         });
 
         if (!response.ok) {
             const errorData = await response.json();
             let errorMsg = errorData.detail || 'Error desconocido';
             if (errorData.errors) {
-                errorMsg += '\n' + errorData.errors.join('\n');  // Muestra lista de errores
+                errorMsg += '\n' + errorData.errors.join('\n');
             }
-            alert(errorMsg);  // Ventana sencilla con el error
+            alert(errorMsg);
             return;
         }
 
-        // Si ok, redirige o muestra éxito
-        const result = await response.json();
-        alert('Usuario creado exitosamente!');
-        // Guardar token en localStorage
-        if (result.token) {
-            localStorage.setItem('token', result.token);
-        }
-        window.location.href = '/';  // Redirige a home
+        // Iniciar sesión automáticamente
+        console.log('DEBUG: Attempting login with URL /autenticar_creacion_usuario/login');
+        const loginResponse = await fetch('/autenticar_creacion_usuario/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `username=${encodeURIComponent(data.email)}&password=${encodeURIComponent(data.password)}`
+        });
+        console.log('DEBUG: Login response status:', loginResponse.status);
 
+        if (!loginResponse.ok) {
+            const errorData = await loginResponse.json();
+            console.log('DEBUG: Login error response:', errorData);
+            alert('Error al iniciar sesión: ' + (errorData.detail || 'Intenta de nuevo'));
+            return;
+        }
+
+        const loginData = await loginResponse.json();
+        console.log('DEBUG: Login successful, received data:', loginData);
+        localStorage.setItem('token', loginData.access_token);
+        console.log('DEBUG: Token stored:', loginData.access_token.substring(0, 10) + '...');
+        alert('Usuario creado exitosamente!');
+        window.location.href = '/crear_reserva';
     } catch (error) {
+        console.error('DEBUG: Error de conexión:', error);
         alert('Error de conexión: ' + error.message);
     }
 });

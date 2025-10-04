@@ -151,3 +151,40 @@ def insert_pago(cursor, connection, reserva_id, tipo_pago, monto, metodo_pago, c
     except Exception as error:
         logger.error(f"❌ Error insertando pago: {error}")
         return False
+def authenticate_user(email, password):
+    """Autentica un usuario por email y contraseña"""
+    try:
+        from .database_connection import connect_postgresql, close_connection
+        
+        connection, cursor = connect_postgresql()
+        if not connection or not cursor:
+            logger.error("No se pudo conectar a la base de datos")
+            return None
+        
+        cursor.execute("""
+            SELECT id, nombre, apellido, email, activo
+            FROM usuarios
+            WHERE email = %s AND password = %s AND activo = true
+        """, (email, password))
+        
+        user = cursor.fetchone()
+        if user:
+            user_data = {
+                'id': user[0],
+                'nombre': user[1],
+                'apellido': user[2],
+                'email': user[3],
+                'activo': user[4]
+            }
+            logger.info(f"Usuario autenticado: {email}")
+            return user_data
+        else:
+            logger.warning(f"Autenticación fallida para: {email}")
+            return None
+            
+    except Exception as error:
+        logger.error(f"Error autenticando usuario: {error}")
+        return None
+    finally:
+        if 'connection' in locals() and 'cursor' in locals():
+            close_connection(connection, cursor)

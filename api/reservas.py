@@ -38,11 +38,17 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     try:
         token = credentials.credentials
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: int = payload.get('sub')
+        user_id: str = payload.get('sub')
+        exp = payload.get('exp')
+        current_time = datetime.utcnow().timestamp()
+        logger.debug(f"Token payload: sub={user_id}, exp={exp}, current_time={current_time}")
         if user_id is None:
+            logger.error("Token inválido: sub no encontrado")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token Inválido')
-        return {'id': user_id}
-    except JWTError:
+        logger.debug(f"Usuario autenticado: ID {user_id}")
+        return {'id': int(user_id)}
+    except JWTError as e:
+        logger.error(f"Error decodificando token: {str(e)}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token Inválido')
 
 # GET /api/reservas - Obtener reservas del usuario autenticado
@@ -53,17 +59,16 @@ async def get_reservas(current_user: dict = Depends(get_current_user)):
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor(cursor_factory=RealDictCursor)
         query = """
-            SELECT r.id, r.fecha_check_in, r.fecha_check_out,
-                   r.cantidad_habitaciones, r.usuario_id,
+            SELECT r.id, r.fecha_check_in AS fecha_entrada, r.fecha_check_out AS fecha_salida,
+                   r.cantidad_habitaciones AS huespedes, u.email AS contacto,
                    r.estado, r.precio_total, r.fecha_creacion
-            FROM reservas r
+            FROM reserva r
+            JOIN usuarios u ON r.usuario_id = u.id
             WHERE r.usuario_id = %s
         """
         reservas = execute_query(cursor, query, (user_id,))
         cursor.close()
         connection.close()
-        if reservas is None:
-            raise HTTPException(status_code=500, detail="Error al obtener reservas")
         logger.info(f"Usuario {user_id} consultó sus reservas")
         return reservas
     except Exception as e:
@@ -79,9 +84,12 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
     try:
         if reserva.cantidad_habitaciones < 1 or reserva.cantidad_habitaciones > 4:
             raise HTTPException(status_code=400, detail="El número de habitaciones debe estar entre 1 y 4")
-        if reserva.fecha_check_in < date.today():
+        if reserva.fecha_check_in.date() < datetime.today().date():
             raise HTTPException(status_code=400, detail="La fecha de check-in no puede ser anterior a hoy")
+        if reserva.fecha_check_out <= reserva.fecha_check_in + timedelta(days=1):
+            raise HTTPException(status_code=400, detail="La reserva debe ser por al menos dos noches")
     except ValueError as e:
+        logger.error(f"Error de validación: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
 
     try:
@@ -91,14 +99,14 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
         # Verificar disponibilidad con capacidad
         query = """
             SELECT SUM(cantidad_habitaciones) as total_habitaciones
-            FROM reservas
+            FROM reserva
             WHERE (fecha_check_in <= %s AND fecha_check_out >= %s)
             AND estado NOT IN ('Cancelada', 'Finalizada')
         """
         cursor.execute(query, (reserva.fecha_check_out, reserva.fecha_check_in))
         result = cursor.fetchone()
         total_habitaciones = result['total_habitaciones'] or 0
-        max_habitaciones = 4  # Capacidad máxima de la posada
+        max_habitaciones = 4
         if total_habitaciones + reserva.cantidad_habitaciones > max_habitaciones:
             cursor.close()
             connection.close()
@@ -106,11 +114,16 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
 
         # Obtener email del usuario para observaciones
         cursor.execute("SELECT email FROM usuarios WHERE id = %s", (user_id,))
-        user_email = cursor.fetchone()['email']
+        user = cursor.fetchone()
+        if not user:
+            cursor.close()
+            connection.close()
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        user_email = user['email']
 
-        # Calcular precio_total (temporal, a ajustar)
+        # Calcular precio_total (temporal)
         dias = (reserva.fecha_check_out - reserva.fecha_check_in).days
-        precio_total = dias * reserva.cantidad_habitaciones * 100.0  # Placeholder
+        precio_total = dias * reserva.cantidad_habitaciones * 100.0
 
         # Insertar reserva
         observaciones = f"Contacto: {user_email}"
@@ -126,10 +139,11 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
         # Obtener la reserva creada
         cursor.execute(
             """
-            SELECT r.id, r.fecha_check_in, r.fecha_check_out,
-                   r.cantidad_habitaciones, r.usuario_id, r.estado,
-                   r.precio_total, r.fecha_creacion
-            FROM reservas r
+            SELECT r.id, r.fecha_check_in AS fecha_entrada, r.fecha_check_out AS fecha_salida,
+                   r.cantidad_habitaciones AS huespedes, u.email AS contacto,
+                   r.estado, r.precio_total, r.fecha_creacion
+            FROM reserva r
+            JOIN usuarios u ON r.usuario_id = u.id
             WHERE r.id = %s
             """,
             (reserva_id,)
@@ -139,7 +153,7 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
         connection.close()
 
         # Log para notificación manual vía WhatsApp
-        logger.info(f"Nueva reserva pendiente: ID {reserva_id}, Contacto: {user_email}, Fechas: {reserva.fecha_check_in} a {reserva.fecha_check_out}, Habitaciones: {reserva.cantidad_habitaciones}. Contactar vía WhatsApp para pago.")
+        logger.info(f"Nueva reserva pendiente: ID {reserva_id}, Contacto: {user_email}, Fechas: {reserva.fecha_check_in.date()} a {reserva.fecha_check_out.date()}, Habitaciones: {reserva.cantidad_habitaciones}. Contactar vía WhatsApp para pago.")
 
         # Enviar mensaje WhatsApp (comentado)
         # try:
@@ -164,10 +178,11 @@ async def get_reservas_pendientes():
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor(cursor_factory=RealDictCursor)
         query = """
-            SELECT r.id, r.fecha_check_in, r.fecha_check_out,
-                   r.cantidad_habitaciones, r.usuario_id,
+            SELECT r.id, r.fecha_check_in AS fecha_entrada, r.fecha_check_out AS fecha_salida,
+                   r.cantidad_habitaciones AS huespedes, u.email AS contacto,
                    r.estado, r.precio_total, r.fecha_creacion
-            FROM reservas r
+            FROM reserva r
+            JOIN usuarios u ON r.usuario_id = u.id
             WHERE r.estado = 'Pendiente'
         """
         reservas = execute_query(cursor, query)
@@ -186,7 +201,7 @@ async def get_disponibilidad(start_date: date, end_date: date):
         cursor = connection.cursor(cursor_factory=RealDictCursor)
         query = """
             SELECT fecha_check_in, fecha_check_out, cantidad_habitaciones
-            FROM reservas
+            FROM reserva
             WHERE fecha_check_in <= %s AND fecha_check_out >= %s
             AND estado NOT IN ('Cancelada', 'Finalizada')
         """
