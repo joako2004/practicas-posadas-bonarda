@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 import jwt
-import datetime
+from datetime import datetime, timedelta, timezone
 from config.database_operations import authenticate_user
 from config.logging_config import logger
 import os
@@ -46,7 +46,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         payload = {
             "sub": str(user["id"]),
             "email": user["email"],
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+            "exp": datetime.now(timezone.utc) + timedelta(hours=24)
         }
         token = jwt.encode(payload, os.getenv('JWT_SECRET', 'tu_jwt_secreto'), algorithm="HS256")
         

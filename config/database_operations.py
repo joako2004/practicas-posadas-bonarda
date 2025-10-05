@@ -155,32 +155,59 @@ def authenticate_user(email, password):
     """Autentica un usuario por email y contraseña"""
     try:
         from .database_connection import connect_postgresql, close_connection
+        import bcrypt
         
         connection, cursor = connect_postgresql()
         if not connection or not cursor:
             logger.error("No se pudo conectar a la base de datos")
             return None
         
+        # DIAGNOSTIC: Log what we're searching for
+        logger.info(f"🔍 DIAGNOSTIC - authenticate_user called with email: {email}")
+        logger.info(f"🔍 DIAGNOSTIC - Password length: {len(password)} chars")
+        
+        # First, get the user by email only
         cursor.execute("""
-            SELECT id, nombre, apellido, email, activo
+            SELECT id, nombre, apellido, email, activo, password
             FROM usuarios
-            WHERE email = %s AND password = %s AND activo = true
-        """, (email, password))
+            WHERE email = %s AND activo = true
+        """, (email,))
         
         user = cursor.fetchone()
-        if user:
-            user_data = {
-                'id': user[0],
-                'nombre': user[1],
-                'apellido': user[2],
-                'email': user[3],
-                'activo': user[4]
-            }
-            logger.info(f"Usuario autenticado: {email}")
-            return user_data
-        else:
-            logger.warning(f"Autenticación fallida para: {email}")
+        if not user:
+            logger.warning(f"❌ DIAGNOSTIC - No user found with email: {email}")
             return None
+        
+        user_id, nombre, apellido, email_db, activo, hashed_password = user
+        logger.info(f"✅ DIAGNOSTIC - User found: {nombre} {apellido} (ID: {user_id})")
+        logger.info(f"🔍 DIAGNOSTIC - Stored hash starts with: {hashed_password[:20]}...")
+        
+        # Now verify the password using bcrypt
+        try:
+            password_bytes = password.encode('utf-8')
+            hashed_password_bytes = hashed_password.encode('utf-8')
+            
+            password_match = bcrypt.checkpw(password_bytes, hashed_password_bytes)
+            logger.info(f"🔍 DIAGNOSTIC - Password match result: {password_match}")
+            
+            if not password_match:
+                logger.warning(f"❌ DIAGNOSTIC - Password verification failed for email: {email}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"❌ DIAGNOSTIC - Error during password verification: {e}")
+            return None
+        
+        # Password verified successfully
+        user_data = {
+            'id': user_id,
+            'nombre': nombre,
+            'apellido': apellido,
+            'email': email_db,
+            'activo': activo
+        }
+        logger.info(f"✅ DIAGNOSTIC - User authenticated successfully: {email}")
+        return user_data
             
     except Exception as error:
         logger.error(f"Error autenticando usuario: {error}")

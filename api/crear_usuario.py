@@ -72,15 +72,31 @@ async def crear_usuario(request: UserCreateRequest):
         token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
 
         logger.info(f'Usuario creado exitosamente con ID {user_id}')
-        return {
-            "user": UserResponse(
+        
+        # Log para debugging - construir respuesta paso a paso
+        try:
+            logger.info(f'Construyendo UserResponse con id={user_id}')
+            logger.info(f'user_data.model_dump(exclude={{password}}): {user_data.model_dump(exclude={"password"})}')
+            
+            user_response = UserResponse(
                 id=user_id,
                 **user_data.model_dump(exclude={'password'}),
                 activo=True,
-                fecha_registro=datetime.now()
-            ),
-            "token": token
-        }
+                fecha_registro=datetime.now(timezone.utc)
+            )
+            logger.info(f'UserResponse creado exitosamente: {user_response}')
+            
+            response_dict = {
+                "user": user_response,
+                "token": token
+            }
+            logger.info(f'Response dict creado: {type(response_dict)}')
+            
+            return response_dict
+        except Exception as e:
+            logger.error(f'Error construyendo respuesta: {type(e).__name__}: {str(e)}')
+            logger.error(f'Traceback completo:', exc_info=True)
+            raise
     except HTTPException:
         raise
     except Exception as e:
