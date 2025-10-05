@@ -42,12 +42,15 @@ async def login(request: LoginRequest):
             raise HTTPException(status_code=401, detail="Credenciales inválidas")
 
         # Crear token JWT
+        secret_key = os.getenv('JWT_SECRET', 'xPS9pT9NLXy42Q_DSHL-oYuA8WmEZoW13Kf6GvvMUW0')
+        logger.debug(f"JWT_SECRET used for encoding: '{secret_key}' (length: {len(secret_key)})")
         payload = {
             "sub": str(user["id"]),
             "email": user["email"],
             "exp": datetime.now(timezone.utc) + timedelta(hours=24)
         }
-        token = jwt.encode(payload, os.getenv('JWT_SECRET', 'tu_jwt_secreto'), algorithm="HS256")
+        token = jwt.encode(payload, secret_key, algorithm="HS256")
+        logger.debug(f"Generated token (first 50 chars): {token[:50]}...")
 
         logger.info(f"Usuario {request.email} autenticado exitosamente")
         return {"access_token": token, "token_type": "bearer", "user": user}

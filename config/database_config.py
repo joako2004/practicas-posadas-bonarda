@@ -3,7 +3,14 @@
 # ==========================================
 import os
 import sys
+from dotenv import load_dotenv
 from .logging_config import logger
+
+# Load environment variables
+logger.info(f"Loading .env from current directory (CWD: {os.getcwd()})")
+load_dotenv()
+logger.info(f"DB_PASSWORD loaded: {bool(os.getenv('DB_PASSWORD'))}")
+logger.info(f"All env vars with DB_: {[k for k in os.environ.keys() if k.startswith('DB_')]}")
 
 def get_database_config():
     """

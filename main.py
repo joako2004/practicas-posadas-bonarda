@@ -5,7 +5,10 @@ from fastapi.responses import FileResponse, JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from api import crear_usuario, autenticar_creacion_usuario, reservas, login
 from dotenv import load_dotenv
+import os
 load_dotenv()  # Carga las variables desde el archivo .env
+print(f"Main.py: DB_PASSWORD loaded: {bool(os.getenv('DB_PASSWORD'))}")
+print(f"Main.py: CWD: {os.getcwd()}")
 
 app = FastAPI()
 

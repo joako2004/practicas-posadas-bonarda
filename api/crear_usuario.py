@@ -8,7 +8,7 @@ import bcrypt
 import jwt
 import os
 
-SECRET_KEY = os.getenv('JWT_SECRET', 'tu_jwt_secreto')
+SECRET_KEY = os.getenv('JWT_SECRET', 'xPS9pT9NLXy42Q_DSHL-oYuA8WmEZoW13Kf6GvvMUW0')
 ALGORITHM = 'HS256'
 
 class UserCreateRequest(BaseModel):
@@ -68,8 +68,10 @@ async def crear_usuario(request: UserCreateRequest):
             raise HTTPException(status_code=500, detail="Error creando usuario")
 
         # Generar token JWT
+        logger.debug(f"JWT_SECRET used for encoding in crear_usuario: '{SECRET_KEY}' (length: {len(SECRET_KEY)})")
         token_data = {"sub": str(user_id), "exp": datetime.now(timezone.utc) + timedelta(days=30)}
         token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+        logger.debug(f"Generated token in crear_usuario (first 50 chars): {token[:50]}...")
 
         logger.info(f'Usuario creado exitosamente con ID {user_id}')
         

@@ -7,21 +7,34 @@ from psycopg2.extras import RealDictCursor
 from config.logging_config import logger
 from models.booking import BookingCreate, BookingResponse
 from config.database_operations import execute_query, insert_reserva
+from config.database_config import get_database_config, validate_database_config
+from dotenv import load_dotenv
 import os
+
+# Load environment variables from .env file
+load_dotenv('../.env')
 # from twilio.rest import Client  # Descomentar si usas Twilio
 
 router = APIRouter()
 
 # Configuración
-SECRET_KEY = os.getenv('JWT_SECRET', 'tu_jwt_secreto')
+SECRET_KEY = os.getenv('JWT_SECRET', 'xPS9pT9NLXy42Q_DSHL-oYuA8WmEZoW13Kf6GvvMUW0')
 ALGORITHM = 'HS256'
-DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'database': os.getenv('DB_NAME', 'posada_db'),
-    'user': os.getenv('DB_USER', 'postgres'),
-    'password': os.getenv('DB_PASSWORD'),
-    'port': os.getenv('DB_PORT', '5432')
-}
+logger.debug(f"JWT_SECRET used for decoding: '{SECRET_KEY}' (length: {len(SECRET_KEY)})")
+DB_CONFIG = get_database_config()
+
+# Debug logging for database config
+logger.debug(f"DB_CONFIG loaded: host={DB_CONFIG['host']}, database={DB_CONFIG['database']}, user={DB_CONFIG['user']}, port={DB_CONFIG['port']}")
+logger.debug(f"DB_PASSWORD from env: {'SET' if DB_CONFIG['password'] else 'NOT SET'}")
+if not DB_CONFIG['password']:
+    logger.warning("DB_PASSWORD is not set! This will cause authentication failure.")
+
+# Validate database config
+is_valid, validation_msg = validate_database_config(DB_CONFIG)
+if not is_valid:
+    logger.error(f"Database config validation failed: {validation_msg}")
+else:
+    logger.info("Database config validation passed.")
 
 # Twilio (comentado)
 # TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "tu_twilio_account_sid")
@@ -37,6 +50,7 @@ security = HTTPBearer()
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
+        logger.debug(f"Token received (first 50 chars): {token[:50]}...")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get('sub')
         exp = payload.get('exp')
@@ -49,6 +63,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         return {'id': int(user_id)}
     except JWTError as e:
         logger.error(f"Error decodificando token: {str(e)}")
+        logger.error(f"Token that failed: {token[:100]}...")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token Inválido')
 
 # GET /api/reservas - Obtener reservas del usuario autenticado
@@ -60,9 +75,9 @@ async def get_reservas(current_user: dict = Depends(get_current_user)):
         cursor = connection.cursor(cursor_factory=RealDictCursor)
         query = """
             SELECT r.id, r.fecha_check_in AS fecha_entrada, r.fecha_check_out AS fecha_salida,
-                   r.cantidad_habitaciones AS huespedes, u.email AS contacto,
-                   r.estado, r.precio_total, r.fecha_creacion
-            FROM reserva r
+                    r.cantidad_habitaciones AS huespedes, u.email AS contacto,
+                    r.estado, r.precio_total, r.fecha_creacion
+            FROM reservas r
             JOIN usuarios u ON r.usuario_id = u.id
             WHERE r.usuario_id = %s
         """
@@ -99,7 +114,7 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
         # Verificar disponibilidad con capacidad
         query = """
             SELECT SUM(cantidad_habitaciones) as total_habitaciones
-            FROM reserva
+            FROM reservas
             WHERE (fecha_check_in <= %s AND fecha_check_out >= %s)
             AND estado NOT IN ('Cancelada', 'Finalizada')
         """
@@ -140,9 +155,9 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
         cursor.execute(
             """
             SELECT r.id, r.fecha_check_in AS fecha_entrada, r.fecha_check_out AS fecha_salida,
-                   r.cantidad_habitaciones AS huespedes, u.email AS contacto,
-                   r.estado, r.precio_total, r.fecha_creacion
-            FROM reserva r
+                    r.cantidad_habitaciones AS huespedes, u.email AS contacto,
+                    r.estado, r.precio_total, r.fecha_creacion
+            FROM reservas r
             JOIN usuarios u ON r.usuario_id = u.id
             WHERE r.id = %s
             """,
@@ -179,9 +194,9 @@ async def get_reservas_pendientes():
         cursor = connection.cursor(cursor_factory=RealDictCursor)
         query = """
             SELECT r.id, r.fecha_check_in AS fecha_entrada, r.fecha_check_out AS fecha_salida,
-                   r.cantidad_habitaciones AS huespedes, u.email AS contacto,
-                   r.estado, r.precio_total, r.fecha_creacion
-            FROM reserva r
+                    r.cantidad_habitaciones AS huespedes, u.email AS contacto,
+                    r.estado, r.precio_total, r.fecha_creacion
+            FROM reservas r
             JOIN usuarios u ON r.usuario_id = u.id
             WHERE r.estado = 'Pendiente'
         """
@@ -201,7 +216,7 @@ async def get_disponibilidad(start_date: date, end_date: date):
         cursor = connection.cursor(cursor_factory=RealDictCursor)
         query = """
             SELECT fecha_check_in, fecha_check_out, cantidad_habitaciones
-            FROM reserva
+            FROM reservas
             WHERE fecha_check_in <= %s AND fecha_check_out >= %s
             AND estado NOT IN ('Cancelada', 'Finalizada')
         """
