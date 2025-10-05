@@ -58,8 +58,15 @@ async def login(request: LoginRequest):
         # Verificar la contraseña
         password_bytes = request.password.encode('utf-8')
         hashed_password_bytes = hashed_password.encode('utf-8')
-        
-        if not bcrypt.checkpw(password_bytes, hashed_password_bytes):
+
+        logger.info(f"🔍 DIAGNOSTIC - Login attempt for DNI: {request.dni}")
+        logger.info(f"🔍 DIAGNOSTIC - Input password length: {len(request.password)} chars, bytes: {len(password_bytes)}")
+        logger.info(f"🔍 DIAGNOSTIC - Stored hash starts with: {hashed_password[:20]}..., length: {len(hashed_password)}")
+
+        password_match = bcrypt.checkpw(password_bytes, hashed_password_bytes)
+        logger.info(f"🔍 DIAGNOSTIC - Password match result: {password_match}")
+
+        if not password_match:
             logger.warning(f"Intento de login fallido: contraseña incorrecta para DNI {request.dni}")
             raise HTTPException(
                 status_code=401,

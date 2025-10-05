@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Request, HTTPException, status, Depends
+from fastapi import APIRouter, Request, HTTPException, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 import jwt
 from datetime import datetime, timedelta, timezone
@@ -32,16 +31,16 @@ async def show_login_form(request: Request):
     return login_templates.TemplateResponse("login.html", {"request": request})
 
 @router.post("/login")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(request: LoginRequest):
     """
     Autenticar usuario y retornar JWT token
     """
     try:
-        user = authenticate_user(form_data.username, form_data.password)
+        user = authenticate_user(request.email, request.password)
         if not user:
-            logger.error(f"Intento de login fallido: usuario {form_data.username} no encontrado o credenciales inválidas")
+            logger.error(f"Intento de login fallido: usuario {request.email} no encontrado o credenciales inválidas")
             raise HTTPException(status_code=401, detail="Credenciales inválidas")
-        
+
         # Crear token JWT
         payload = {
             "sub": str(user["id"]),
@@ -49,8 +48,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             "exp": datetime.now(timezone.utc) + timedelta(hours=24)
         }
         token = jwt.encode(payload, os.getenv('JWT_SECRET', 'tu_jwt_secreto'), algorithm="HS256")
-        
-        logger.info(f"Usuario {form_data.username} autenticado exitosamente")
+
+        logger.info(f"Usuario {request.email} autenticado exitosamente")
         return {"access_token": token, "token_type": "bearer", "user": user}
     except Exception as e:
         logger.error(f"Error en login: {str(e)}")

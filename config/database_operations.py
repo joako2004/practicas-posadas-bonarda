@@ -164,36 +164,38 @@ def authenticate_user(email, password):
         
         # DIAGNOSTIC: Log what we're searching for
         logger.info(f"🔍 DIAGNOSTIC - authenticate_user called with email: {email}")
-        logger.info(f"🔍 DIAGNOSTIC - Password length: {len(password)} chars")
-        
+        logger.info(f"🔍 DIAGNOSTIC - Password length: {len(password)} chars, bytes: {len(password.encode('utf-8'))}")
+
         # First, get the user by email only
         cursor.execute("""
             SELECT id, nombre, apellido, email, activo, password
             FROM usuarios
             WHERE email = %s AND activo = true
         """, (email,))
-        
+
         user = cursor.fetchone()
         if not user:
             logger.warning(f"❌ DIAGNOSTIC - No user found with email: {email}")
             return None
-        
+
         user_id, nombre, apellido, email_db, activo, hashed_password = user
         logger.info(f"✅ DIAGNOSTIC - User found: {nombre} {apellido} (ID: {user_id})")
-        logger.info(f"🔍 DIAGNOSTIC - Stored hash starts with: {hashed_password[:20]}...")
-        
+        logger.info(f"🔍 DIAGNOSTIC - Stored hash length: {len(hashed_password)} chars, starts with: {hashed_password[:20]}...")
+
         # Now verify the password using bcrypt
         try:
             password_bytes = password.encode('utf-8')
             hashed_password_bytes = hashed_password.encode('utf-8')
-            
+
+            logger.info(f"🔍 DIAGNOSTIC - Password bytes length: {len(password_bytes)}, hash bytes length: {len(hashed_password_bytes)}")
+
             password_match = bcrypt.checkpw(password_bytes, hashed_password_bytes)
             logger.info(f"🔍 DIAGNOSTIC - Password match result: {password_match}")
-            
+
             if not password_match:
                 logger.warning(f"❌ DIAGNOSTIC - Password verification failed for email: {email}")
                 return None
-                
+
         except Exception as e:
             logger.error(f"❌ DIAGNOSTIC - Error during password verification: {e}")
             return None
