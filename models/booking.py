@@ -16,6 +16,13 @@ class BookingBase(BaseModel):
     fecha_check_out: date
     cantidad_habitaciones: int = Field(..., ge=1)
 
+
+# lo que manda el cliente
+class BookingCreate(BaseModel):
+    fecha_check_in: date
+    fecha_check_out: date
+    cantidad_habitaciones: int = Field(..., ge=1)
+
     @model_validator(mode="after")
     def validate_date(self):
         if self.fecha_check_in >= self.fecha_check_out:
@@ -23,11 +30,6 @@ class BookingBase(BaseModel):
         if (self.fecha_check_out - self.fecha_check_in).days < 2:
             raise ValueError("La reserva debe ser por al menos dos noches")
         return self
-
-
-# lo que manda el cliente
-class BookingCreate(BookingBase):
-    pass
 
 
 # lo que se guarda en la DB

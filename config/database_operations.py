@@ -57,12 +57,12 @@ def insert_usuario(user_data):
     """Inserta un nuevo usuario usando el objeto UserCreate"""
     try:
         from .database_connection import connect_postgresql, close_connection
-        
+
         connection, cursor = connect_postgresql()
         if not connection or not cursor:
             logger.error("No se pudo conectar a la base de datos")
-            return False
-        
+            return {"error": "Database connection failed", "type": "connection_error"}
+
         cursor.execute("""
             INSERT INTO usuarios (nombre, apellido, dni, cuil_cuit, email, telefono, password)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -84,12 +84,26 @@ def insert_usuario(user_data):
         connection.commit()
         logger.info(f"Usuario creado con ID: {user_id}")
         return user_id
-        
+
     except Exception as error:
         logger.error(f"Error insertando usuario: {error}")
         if 'connection' in locals() and connection:
             connection.rollback()
-        return False
+
+        # Check for specific error types
+        error_str = str(error)
+        if 'psycopg2' in str(type(error)) and 'IntegrityError' in error_str:
+            logger.error("DEBUG: Likely duplicate constraint violation (email, dni, or cuil_cuit)")
+            if 'email' in error_str.lower():
+                return {"error": "El email ya está registrado", "type": "duplicate_email"}
+            elif 'dni' in error_str.lower():
+                return {"error": "El DNI ya está registrado", "type": "duplicate_dni"}
+            elif 'cuil_cuit' in error_str.lower():
+                return {"error": "El CUIL/CUIT ya está registrado", "type": "duplicate_cuil_cuit"}
+            else:
+                return {"error": "Violación de restricción de unicidad", "type": "duplicate_constraint", "details": error_str}
+        else:
+            return {"error": "Error interno del servidor", "type": "internal_error", "details": error_str}
     finally:
         if 'connection' in locals() and 'cursor' in locals():
             close_connection(connection, cursor)
@@ -166,20 +180,20 @@ def authenticate_user(email, password):
         logger.info(f"🔍 DIAGNOSTIC - authenticate_user called with email: {email}")
         logger.info(f"🔍 DIAGNOSTIC - Password length: {len(password)} chars, bytes: {len(password.encode('utf-8'))}")
 
-        # First, get the user by email only
+        # First, get the user by email only (case-insensitive)
         cursor.execute("""
             SELECT id, nombre, apellido, email, activo, password
             FROM usuarios
-            WHERE email = %s AND activo = true
+            WHERE LOWER(email) = LOWER(%s) AND activo = true
         """, (email,))
 
         user = cursor.fetchone()
         if not user:
-            logger.warning(f"❌ DIAGNOSTIC - No user found with email: {email}")
+            logger.warning(f"❌ DIAGNOSTIC - No user found with email: {email} (searched case-insensitively)")
             return None
 
         user_id, nombre, apellido, email_db, activo, hashed_password = user
-        logger.info(f"✅ DIAGNOSTIC - User found: {nombre} {apellido} (ID: {user_id})")
+        logger.info(f"✅ DIAGNOSTIC - User found: {nombre} {apellido} (ID: {user_id}), DB email: {email_db}")
         logger.info(f"🔍 DIAGNOSTIC - Stored hash length: {len(hashed_password)} chars, starts with: {hashed_password[:20]}...")
 
         # Now verify the password using bcrypt
@@ -188,6 +202,7 @@ def authenticate_user(email, password):
             hashed_password_bytes = hashed_password.encode('utf-8')
 
             logger.info(f"🔍 DIAGNOSTIC - Password bytes length: {len(password_bytes)}, hash bytes length: {len(hashed_password_bytes)}")
+            logger.info(f"🔍 DIAGNOSTIC - Comparing lengths for truncation debug: input password {len(password_bytes)} bytes vs stored hash {len(hashed_password_bytes)} bytes")
 
             password_match = bcrypt.checkpw(password_bytes, hashed_password_bytes)
             logger.info(f"🔍 DIAGNOSTIC - Password match result: {password_match}")

@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import os
 
 # Load environment variables from .env file
-load_dotenv('../.env')
+load_dotenv()
 # from twilio.rest import Client  # Descomentar si usas Twilio
 
 router = APIRouter()
@@ -99,7 +99,7 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
     try:
         if reserva.cantidad_habitaciones < 1 or reserva.cantidad_habitaciones > 4:
             raise HTTPException(status_code=400, detail="El número de habitaciones debe estar entre 1 y 4")
-        if reserva.fecha_check_in.date() < datetime.today().date():
+        if reserva.fecha_check_in < datetime.today().date():
             raise HTTPException(status_code=400, detail="La fecha de check-in no puede ser anterior a hoy")
         if reserva.fecha_check_out <= reserva.fecha_check_in + timedelta(days=1):
             raise HTTPException(status_code=400, detail="La reserva debe ser por al menos dos noches")
@@ -128,9 +128,15 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
             raise HTTPException(status_code=400, detail="No hay suficientes habitaciones disponibles en esas fechas")
 
         # Obtener email del usuario para observaciones
+        logger.info(f"🔍 DEBUG - DB_CONFIG in create_reserva: {DB_CONFIG}")
+        logger.info(f"🔍 DEBUG - user_id from token: {user_id}")
+        logger.debug(f"Attempting to fetch user with ID: {user_id}")
         cursor.execute("SELECT email FROM usuarios WHERE id = %s", (user_id,))
         user = cursor.fetchone()
+        logger.debug(f"User fetch result for ID {user_id}: {user}")
+        logger.info(f"🔍 DEBUG - User query result: {user}")
         if not user:
+            logger.error(f"User with ID {user_id} not found in database")
             cursor.close()
             connection.close()
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
@@ -168,7 +174,7 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
         connection.close()
 
         # Log para notificación manual vía WhatsApp
-        logger.info(f"Nueva reserva pendiente: ID {reserva_id}, Contacto: {user_email}, Fechas: {reserva.fecha_check_in.date()} a {reserva.fecha_check_out.date()}, Habitaciones: {reserva.cantidad_habitaciones}. Contactar vía WhatsApp para pago.")
+        logger.info(f"Nueva reserva pendiente: ID {reserva_id}, Contacto: {user_email}, Fechas: {reserva.fecha_check_in} a {reserva.fecha_check_out}, Habitaciones: {reserva.cantidad_habitaciones}. Contactar vía WhatsApp para pago.")
 
         # Enviar mensaje WhatsApp (comentado)
         # try:

@@ -29,43 +29,42 @@ async def crear_usuario(request: UserCreateRequest):
 
         logger.info(f'Password received: {repr(password)}, len chars: {len(password)}, len bytes: {len(password.encode("utf-8"))}')
 
-        # Validar longitud en caracteres
-        if len(password) > 72:
+        # Validate plain password with UserCreate before hashing
+        try:
+            user_data = UserCreate(
+                nombre=request.nombre,
+                apellido=request.apellido,
+                dni=request.dni,
+                cuil_cuit=request.cuil_cuit,
+                email=request.email,
+                telefono=request.telefono,
+                password=password
+            )
+            logger.info("DEBUG: UserCreate validation passed with plain password")
+        except Exception as e:
+            logger.error(f"DEBUG: UserCreate validation failed: {type(e).__name__}: {str(e)}")
             raise HTTPException(
                 status_code=400,
-                detail='La contraseña no puede tener más de 72 caracteres'
+                detail=str(e)
             )
 
-        # Validación corregida
-        if len(password) < 8:
-            raise HTTPException(
-                status_code=400,
-                detail='La contraseña debe tener al menos 8 caracteres'
-            )
-
-        # Truncar a 72 bytes para evitar error de bcrypt
-        password = password.encode('utf-8')[:72].decode('utf-8', errors='replace')
-
-        logger.info(f'Password after truncate: {repr(password)}, len chars: {len(password)}, len bytes: {len(password.encode("utf-8"))}')
-
-        # Hash la contraseña
+        # Hash the password after validation
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-        # CRÍTICO: Usar la contraseña hasheada
-        user_data = UserCreate(
-            nombre=request.nombre,
-            apellido=request.apellido,
-            dni=request.dni,
-            cuil_cuit=request.cuil_cuit,
-            email=request.email,
-            telefono=request.telefono,
-            password=hashed_password
-        )
+        # Update user_data with hashed password for insertion
+        user_data.password = hashed_password
         
         user_id = insert_usuario(user_data)
 
-        if not user_id:
-            raise HTTPException(status_code=500, detail="Error creando usuario")
+        if isinstance(user_id, dict):
+            # Handle error details from insert_usuario
+            error_type = user_id.get("type")
+            if error_type in ["duplicate_email", "duplicate_dni", "duplicate_cuil_cuit", "duplicate_constraint"]:
+                raise HTTPException(status_code=422, detail=user_id["error"])
+            else:
+                raise HTTPException(status_code=500, detail=user_id["error"])
+
+        logger.info(f"🔍 DEBUG - User created with ID {user_id}, DB_HOST={os.getenv('DB_HOST', 'localhost')}, DB_NAME={os.getenv('DB_NAME', 'posada_db')}")
 
         # Generar token JWT
         logger.debug(f"JWT_SECRET used for encoding in crear_usuario: '{SECRET_KEY}' (length: {len(SECRET_KEY)})")
@@ -76,10 +75,11 @@ async def crear_usuario(request: UserCreateRequest):
         logger.info(f'Usuario creado exitosamente con ID {user_id}')
         
         # Log para debugging - construir respuesta paso a paso
+        user_response = None
         try:
             logger.info(f'Construyendo UserResponse con id={user_id}')
             logger.info(f'user_data.model_dump(exclude={{password}}): {user_data.model_dump(exclude={"password"})}')
-            
+
             user_response = UserResponse(
                 id=user_id,
                 **user_data.model_dump(exclude={'password'}),
@@ -87,18 +87,29 @@ async def crear_usuario(request: UserCreateRequest):
                 fecha_registro=datetime.now(timezone.utc)
             )
             logger.info(f'UserResponse creado exitosamente: {user_response}')
-            
-            response_dict = {
-                "user": user_response,
-                "token": token
-            }
-            logger.info(f'Response dict creado: {type(response_dict)}')
-            
-            return response_dict
+
         except Exception as e:
-            logger.error(f'Error construyendo respuesta: {type(e).__name__}: {str(e)}')
+            logger.error(f'Error construyendo UserResponse: {type(e).__name__}: {str(e)}')
             logger.error(f'Traceback completo:', exc_info=True)
-            raise
+            user_response = {
+                "id": user_id,
+                "nombre": request.nombre,
+                "apellido": request.apellido,
+                "dni": request.dni,
+                "cuil_cuit": request.cuil_cuit,
+                "email": request.email,
+                "telefono": request.telefono,
+                "activo": True,
+                "fecha_registro": datetime.now(timezone.utc)
+            }
+
+        response_dict = {
+            "user": user_response,
+            "token": token
+        }
+        logger.info(f'Response dict creado: {type(response_dict)}')
+
+        return response_dict
     except HTTPException:
         raise
     except Exception as e:

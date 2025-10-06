@@ -42,16 +42,28 @@ document.querySelector('.registration-form').addEventListener('submit', async fu
         return;
     }
 
+    // Verifica que los elementos del formulario existen
+    if (!document.getElementById('email')) {
+        alert('Campo de email no encontrado');
+        return;
+    }
+    if (!document.getElementById('password')) {
+        alert('Campo de contraseña no encontrado');
+        return;
+    }
+
     // Recopila datos del form
     const data = {
         nombre: document.getElementById('nombre').value,
         apellido: document.getElementById('apellido').value,
         dni: document.getElementById('dni').value,
         cuil_cuit: document.getElementById('cuil_cuit').value,
-        email: document.getElementById('email').value,
+        email: document.getElementById('email').value || "",
         telefono: document.getElementById('telefono').value,
-        password: document.getElementById('password').value
+        password: document.getElementById('password').value || ""
     };
+
+    console.log('DEBUG: Data to send for user creation:', data);
 
     try {
         // Crear usuario
@@ -75,12 +87,16 @@ document.querySelector('.registration-form').addEventListener('submit', async fu
 
         // Iniciar sesión automáticamente
         console.log('DEBUG: Attempting login with URL /autenticar_creacion_usuario/login');
+        console.log('DEBUG: Login request data:', {email: data.email, password: data.password || ""});
         const loginResponse = await fetch('/autenticar_creacion_usuario/login', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/json'
             },
-            body: `username=${encodeURIComponent(data.email)}&password=${encodeURIComponent(data.password)}`
+            body: JSON.stringify({
+                email: data.email,
+                password: data.password || ""
+            })
         });
         console.log('DEBUG: Login response status:', loginResponse.status);
 

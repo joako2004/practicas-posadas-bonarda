@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Request, HTTPException, status
+from fastapi import APIRouter, Request, HTTPException, status, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import EmailStr
 import jwt
 from datetime import datetime, timedelta, timezone
 from config.database_operations import authenticate_user
@@ -11,10 +11,6 @@ import os
 router = APIRouter()
 templates = Jinja2Templates(directory="public/pages/crear_usuario")
 login_templates = Jinja2Templates(directory="public/pages/login")
-
-class LoginRequest(BaseModel):
-    email: str
-    password: str
 
 @router.get("/registrar", response_class=HTMLResponse)
 async def show_register_form(request: Request):
@@ -31,14 +27,15 @@ async def show_login_form(request: Request):
     return login_templates.TemplateResponse("login.html", {"request": request})
 
 @router.post("/login")
-async def login(request: LoginRequest):
+async def login(username: EmailStr = Form(...), password: str = Form(...)):
     """
     Autenticar usuario y retornar JWT token
     """
+    logger.info(f"🔍 DIAGNOSTIC - Login request received: username='{username}', password_length={len(password)}")
     try:
-        user = authenticate_user(request.email, request.password)
+        user = authenticate_user(username, password)
         if not user:
-            logger.error(f"Intento de login fallido: usuario {request.email} no encontrado o credenciales inválidas")
+            logger.error(f"Intento de login fallido: usuario {username} no encontrado o credenciales inválidas")
             raise HTTPException(status_code=401, detail="Credenciales inválidas")
 
         # Crear token JWT
@@ -52,7 +49,7 @@ async def login(request: LoginRequest):
         token = jwt.encode(payload, secret_key, algorithm="HS256")
         logger.debug(f"Generated token (first 50 chars): {token[:50]}...")
 
-        logger.info(f"Usuario {request.email} autenticado exitosamente")
+        logger.info(f"Usuario {username} autenticado exitosamente")
         return {"access_token": token, "token_type": "bearer", "user": user}
     except Exception as e:
         logger.error(f"Error en login: {str(e)}")
