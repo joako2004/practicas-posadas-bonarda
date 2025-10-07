@@ -2,18 +2,21 @@ document.querySelector('.login-form').addEventListener('submit', async function(
     e.preventDefault();  // Evita submit tradicional
 
     // Recopila datos del form
-    const data = {
-        email: document.getElementById('email').value,
-        password: document.getElementById('password').value
-    };
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    // Crear FormData con URLSearchParams
+    const formData = new URLSearchParams();
+    formData.append('username', email);  // Backend espera 'username', no 'email'
+    formData.append('password', password);
 
     try {
         const response = await fetch('/autenticar_creacion_usuario/login', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: JSON.stringify(data)
+            body: formData.toString()
         });
 
         if (!response.ok) {
