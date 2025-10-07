@@ -58,9 +58,12 @@ def insert_usuario(user_data):
     try:
         from .database_connection import connect_postgresql, close_connection
 
+        logger.info(f"🔍 DIAGNOSTIC - insert_usuario called with user_data type: {type(user_data)}")
         connection, cursor = connect_postgresql()
+        logger.info(f"🔍 DIAGNOSTIC - Database connection result: connection={connection is not None}, cursor={cursor is not None}")
+        
         if not connection or not cursor:
-            logger.error("No se pudo conectar a la base de datos")
+            logger.error("🔍 DIAGNOSTIC - Database connection FAILED - returning error dict")
             return {"error": "Database connection failed", "type": "connection_error"}
 
         cursor.execute("""
@@ -83,9 +86,11 @@ def insert_usuario(user_data):
         user_id = result[0]
         connection.commit()
         logger.info(f"Usuario creado con ID: {user_id}")
+        logger.info(f"🔍 DIAGNOSTIC - User successfully inserted with ID: {user_id}")
         return user_id
 
     except Exception as error:
+        logger.error(f"🔍 DIAGNOSTIC - Exception caught in insert_usuario: type={type(error).__name__}, message={str(error)}")
         logger.error(f"Error insertando usuario: {error}")
         if 'connection' in locals() and connection:
             connection.rollback()

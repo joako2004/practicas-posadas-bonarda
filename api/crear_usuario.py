@@ -54,7 +54,9 @@ async def crear_usuario(request: UserCreateRequest):
         # Update user_data with hashed password for insertion
         user_data.password = hashed_password
         
+        logger.info(f"🔍 DIAGNOSTIC - About to call insert_usuario with data: {user_data.model_dump(exclude={'password'})}")
         user_id = insert_usuario(user_data)
+        logger.info(f"🔍 DIAGNOSTIC - insert_usuario returned: type={type(user_id)}, value={user_id if not isinstance(user_id, dict) else user_id}")
 
         if isinstance(user_id, dict):
             # Handle error details from insert_usuario
@@ -113,7 +115,8 @@ async def crear_usuario(request: UserCreateRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f'Error en registro: {e}') 
+        logger.error(f'🔍 DIAGNOSTIC - Unhandled exception in crear_usuario: type={type(e).__name__}, message={str(e)}')
+        logger.error(f'Error en registro: {e}', exc_info=True)
         raise HTTPException(
             status_code=500,
             detail='Error interno del servidor. Por favor, intenta de nuevo'

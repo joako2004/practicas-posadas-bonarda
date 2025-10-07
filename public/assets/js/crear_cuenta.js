@@ -87,16 +87,18 @@ document.querySelector('.registration-form').addEventListener('submit', async fu
 
         // Iniciar sesión automáticamente
         console.log('DEBUG: Attempting login with URL /autenticar_creacion_usuario/login');
-        console.log('DEBUG: Login request data:', {email: data.email, password: data.password || ""});
+        console.log('DEBUG: Login request data:', {username: data.email, password: data.password || ""});
+        
+        const formData = new URLSearchParams();
+        formData.append('username', data.email);
+        formData.append('password', data.password || "");
+        
         const loginResponse = await fetch('/autenticar_creacion_usuario/login', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: JSON.stringify({
-                email: data.email,
-                password: data.password || ""
-            })
+            body: formData.toString()
         });
         console.log('DEBUG: Login response status:', loginResponse.status);
 

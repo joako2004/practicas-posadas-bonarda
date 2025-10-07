@@ -27,11 +27,45 @@ async def show_login_form(request: Request):
     return login_templates.TemplateResponse("login.html", {"request": request})
 
 @router.post("/login")
-async def login(username: EmailStr = Form(...), password: str = Form(...)):
+async def login(request: Request):
     """
     Autenticar usuario y retornar JWT token
     """
-    logger.info(f"🔍 DIAGNOSTIC - Login request received: username='{username}', password_length={len(password)}")
+    # Log raw request details
+    logger.info(f"🔍 DIAGNOSTIC - RAW REQUEST RECEIVED")
+    logger.info(f"🔍 DIAGNOSTIC - Method: {request.method}")
+    logger.info(f"🔍 DIAGNOSTIC - URL: {request.url}")
+    logger.info(f"🔍 DIAGNOSTIC - Content-Type: {request.headers.get('content-type', 'NOT SET')}")
+    
+    # Read and log the raw body
+    try:
+        body = await request.body()
+        logger.info(f"🔍 DIAGNOSTIC - Raw body length: {len(body)} bytes")
+        logger.info(f"🔍 DIAGNOSTIC - Raw body content: {body.decode('utf-8', errors='replace')}")
+    except Exception as e:
+        logger.error(f"🔍 DIAGNOSTIC - Could not read raw body: {e}")
+        raise HTTPException(status_code=400, detail="Could not read request body")
+    
+    # Parse form data manually
+    try:
+        from urllib.parse import parse_qs
+        body_str = body.decode('utf-8')
+        form_data = parse_qs(body_str)
+        logger.info(f"🔍 DIAGNOSTIC - Parsed form data: {form_data}")
+        
+        username = form_data.get('username', [None])[0]
+        password = form_data.get('password', [None])[0]
+        
+        if not username or not password:
+            logger.error(f"🔍 DIAGNOSTIC - Missing credentials: username={username}, password={'SET' if password else 'NOT SET'}")
+            raise HTTPException(status_code=422, detail="Missing username or password")
+        
+        logger.info(f"🔍 DIAGNOSTIC - Form parsed successfully: username='{username}', password_length={len(password)}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"🔍 DIAGNOSTIC - Error parsing form data: {e}")
+        raise HTTPException(status_code=422, detail=f"Invalid form data: {str(e)}")
     try:
         user = authenticate_user(username, password)
         if not user:
