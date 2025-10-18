@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 from config.logging_config import logger
 import os
 load_dotenv()  # Carga las variables desde el archivo .env
-print(f"Main.py: DB_PASSWORD loaded: {bool(os.getenv('DB_PASSWORD'))}")
-print(f"Main.py: CWD: {os.getcwd()}")
+logger.info(f"Main.py: DB_PASSWORD loaded: {bool(os.getenv('DB_PASSWORD'))}")
+logger.info(f"Main.py: CWD: {os.getcwd()}")
 
 app = FastAPI(debug=False)
 
