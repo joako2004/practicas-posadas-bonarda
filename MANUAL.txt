@@ -1,0 +1,233 @@
+1. INTRODUCCIÓN AL PROYECTO
+   - Descripción general
+     Este proyecto es un sistema de gestión de reservas para una posada llamada "Bonarda Posadas". Se trata de una aplicación web completa que permite a los usuarios crear cuentas, iniciar sesión y gestionar reservas de habitaciones. El sistema está diseñado para manejar hasta 4 habitaciones y soporta autenticación JWT, validación de datos con Pydantic y persistencia en base de datos PostgreSQL.
+
+   - Tecnologías utilizadas
+     - Backend: FastAPI (framework web asíncrono para Python)
+     - Base de datos: PostgreSQL con psycopg2-binary
+     - Modelos de datos: Pydantic para validación y serialización
+     - Autenticación: JWT (JSON Web Tokens) con PyJWT
+     - Hashing de contraseñas: bcrypt
+     - Variables de entorno: python-dotenv
+     - Logging: logging nativo de Python con rotación de archivos
+     - Frontend: HTML5, CSS3, JavaScript vanilla con Axios para requests HTTP
+     - Servidor: Uvicorn (servidor ASGI)
+
+   - Arquitectura general
+     La arquitectura sigue un patrón MVC simplificado:
+     - Modelos (models/): Definición de esquemas de datos con Pydantic
+     - Vistas (public/): Páginas HTML estáticas servidas por FastAPI
+     - Controladores (api/): Endpoints REST que manejan la lógica de negocio
+     - Configuración (config/): Gestión de BD, logging y inicialización del sistema
+     El backend expone una API RESTful que el frontend consume vía JavaScript.
+
+2. ESTRUCTURA DEL PROYECTO
+   - Archivos principales (main.py, requirements.txt, .gitignore)
+     - main.py: Punto de entrada de la aplicación FastAPI. Configura el servidor, maneja excepciones globales, monta archivos estáticos y incluye routers de API.
+     - requirements.txt: Lista de dependencias Python con versiones específicas. Incluye FastAPI, Pydantic, psycopg2, bcrypt, PyJWT, etc.
+     - .gitignore: Configuración de Git para ignorar archivos sensibles como .env, __pycache__, logs, bases de datos locales y entornos virtuales.
+
+   - Carpetas y su propósito
+     - api/: Contiene los routers FastAPI para endpoints REST (crear_usuario.py, login.py, reservas.py, etc.)
+     - config/: Módulos de configuración del sistema (base de datos, logging, inicialización)
+     - models/: Modelos Pydantic para validación de datos (user.py, booking.py, payments.py, etc.)
+     - public/: Frontend estático con páginas HTML, CSS, JavaScript e imágenes
+
+3. CONFIGURACIÓN DEL SISTEMA (carpeta config/)
+   - Propósito y arquitectura
+     Esta carpeta centraliza toda la configuración del sistema, incluyendo conexión a base de datos, logging, inicialización de esquemas y operaciones CRUD. Sigue el patrón de separación de responsabilidades, aislando la configuración del resto de la aplicación.
+
+   - Documentación detallada de cada archivo
+     - __init__.py: Archivo vacío, marca el directorio como paquete Python.
+     - database_config.py: Gestiona configuración de base de datos desde variables de entorno. Incluye funciones para validar configuración, obtener info del entorno y probar setup.
+     - database_connection.py: Maneja conexiones PostgreSQL. Incluye verificación/creación automática de base de datos, reconexión automática, verificación de conexiones activas y estadísticas del sistema.
+     - database_initialization.py: Inicializa el esquema de base de datos. Crea tablas (usuarios, habitaciones, reservas, precios, pagos), inserta datos por defecto (4 habitaciones) y establece precios iniciales.
+     - database_operations.py: Operaciones CRUD genéricas. Incluye funciones para insertar usuarios, reservas y pagos, con manejo de errores y logging detallado.
+     - logging_config.py: Configuración completa del sistema de logging. Crea directorio logs/, configura handlers para archivo (con rotación) y consola, incluye funciones utilitarias para logging de eventos específicos.
+
+   - Variables de entorno requeridas
+     - DB_HOST: Host del servidor PostgreSQL (default: localhost)
+     - DB_NAME: Nombre de la base de datos (default: posada_db)
+     - DB_USER: Usuario de PostgreSQL (default: postgres)
+     - DB_PASSWORD: Contraseña del usuario (requerido, sin default)
+     - DB_PORT: Puerto del servidor PostgreSQL (default: 5432)
+     - JWT_SECRET: Clave secreta para tokens JWT (default: valor hardcodeado para desarrollo)
+     - ENVIRONMENT: Entorno de ejecución (default: development)
+
+4. MODELOS DE DATOS (carpeta models/)
+   - Propósito
+     Los modelos Pydantic definen la estructura de datos, validaciones y serialización para toda la aplicación. Proporcionan type safety, validación automática de entrada/salida y documentación de API.
+
+   - Documentación de cada modelo Pydantic
+     - user.py: Modelos para usuarios
+       - UserBase: Campos base (nombre, apellido, dni, cuil_cuit, email, telefono)
+       - UserCreate: Para creación, incluye password con validaciones (8-72 chars, mayúscula, minúscula)
+       - UserInDB: Para datos en BD, incluye id y fecha_registro
+       - UserResponse: Para respuestas API, incluye activo
+       Validadores personalizados para DNI (solo números), CUIL/CUIT (formato) y teléfono (solo números y guiones).
+
+     - booking.py: Modelos para reservas
+       - BookingBase: Campos base (usuario_id, fechas check-in/out, cantidad_habitaciones)
+       - BookingCreate: Para creación, con validaciones de fechas (check-out > check-in + 1 día, mínimo 2 noches)
+       - BookingInDB: Para BD, incluye id, precio_total, estado, fecha_creacion
+       - BookingResponse: Para respuestas API
+       Estados: pendiente, confirmada, cancelada, finalizada
+
+     - payments.py: Modelos para pagos
+       - PaymentBase: Campos base (reserva_id, tipo_pago, monto, metodo_pago, estado_pago, recibo, nota)
+       - Tipos de pago: seña, pago_completo
+       - Métodos: efectivo, transferencia, tarjeta_debito, tarjeta_credito
+       - Estados: pendiente, pagado, reembolsado
+
+     - prices.py: Modelos para precios
+       - PriceBase: precio_por_noche (entero positivo)
+       - PriceCreate, PriceInDB, PriceResponse: Variantes estándar
+
+     - room.py: Modelos para habitaciones
+       - RoomBase: numero (1-4), descripcion, disponible, fecha_creacion
+       - RoomCreate, RoomInDB, RoomResponse: Variantes estándar
+
+     - booking_room_base.py: Modelo para asignación habitación-reserva
+       - BookingRoomBase: reserva_id, habitacion_id
+       - BookingRoomCreate, BookingRoomInDB, BookingRoomResponse: Variantes con timestamps
+
+   - Esquema de base de datos
+     - usuarios: id, nombre, apellido, dni (único), cuil_cuit (único), email (único), telefono, password, fecha_registro, activo
+     - habitaciones: id, numero (1-4 único), descripcion, disponible, fecha_creacion
+     - precios: id, precio_por_noche, fecha_vigencia_desde, descripcion, activo, fecha_creacion
+     - reservas: id, usuario_id (FK), fecha_check_in, fecha_check_out, cantidad_habitaciones (1-4), precio_total, estado, observaciones, fecha_creacion
+     - reserva_habitaciones: id, reserva_id (FK), habitacion_id (FK), fecha_asignacion
+     - pagos: id, reserva_id (FK), tipo_pago, monto, metodo_pago, estado_pago, fecha_pago, comprobante, observaciones
+
+5. API BACKEND (carpeta api/)
+   - Propósito
+     La carpeta api/ contiene los routers FastAPI que implementan la API REST del sistema. Cada archivo define endpoints específicos con validación automática, manejo de errores y logging.
+
+   - Endpoints detallados
+     - crear_usuario.py (prefix: /usuarios)
+       - POST /crear: Crea nuevo usuario con validación Pydantic, hashing bcrypt, generación JWT. Retorna usuario y token.
+
+     - autenticar_creacion_usuario.py (prefix: /autenticar_creacion_usuario)
+       - GET /registrar: Muestra formulario de registro
+       - GET /login: Muestra formulario de login
+       - POST /login: Autentica usuario por email/password, retorna JWT
+
+     - login.py (prefix: /api)
+       - POST /login: Autenticación alternativa por DNI/password
+
+     - reservas.py (prefix: /api)
+       - GET /reservas: Lista reservas del usuario autenticado (requiere JWT)
+       - POST /reservas: Crea nueva reserva con validaciones de disponibilidad
+       - GET /reservas/pendientes: Lista reservas pendientes (para admin)
+       - GET /disponibilidad: Retorna reservas para calendario (fechas start/end)
+
+   - Autenticación y autorización
+     - Autenticación JWT: Tokens con expiración 24h (login) o 30 días (registro)
+     - Middleware HTTPBearer para proteger endpoints
+     - Decodificación y validación de tokens en cada request protegido
+     - Usuario actual extraído del token para operaciones
+
+   - Flujos de operaciones
+     - Registro: Validación → Hashing password → Insert BD → Generar token → Retornar respuesta
+     - Login: Buscar usuario → Verificar password bcrypt → Generar token → Retornar
+     - Reserva: Validar fechas/disponibilidad → Calcular precio → Insert reserva → Retornar
+     - Todas las operaciones incluyen logging detallado y manejo de errores con rollback de transacciones
+
+6. FRONTEND (carpeta public/)
+   - Propósito y estructura
+     El frontend es una aplicación web estática servida por FastAPI. Consiste en páginas HTML con CSS personalizado y JavaScript vanilla que consume la API REST. La estructura sigue un patrón de páginas individuales con navegación simple.
+
+   - Páginas HTML
+     - home.html: Página principal con navegación y llamada a acción para reservas
+     - crear_usuario.html: Formulario de registro con validaciones cliente
+     - crear_reserva.html: Dashboard de usuario para ver/crear reservas (requiere autenticación)
+     - login.html: Formulario de login por email
+     - sobre_nosotros.html: Página informativa sobre la posada con galería de imágenes
+     - ya_tengo_sesion.html: Formulario alternativo de login por DNI
+
+   - CSS y JavaScript
+     - CSS: Archivos específicos por página (home.css, crear_cuenta.css, etc.) con estilos responsivos
+     - JavaScript: Scripts por funcionalidad (crear_cuenta.js para registro, crear_reserva.js para gestión de reservas, login.js para autenticación)
+     - Librerías: Axios para HTTP requests, manipulación DOM nativa
+
+   - Integración con API
+     - Formularios envían datos vía POST a endpoints API
+     - Respuestas manejadas con promesas JavaScript
+     - JWT almacenado en localStorage para requests autenticados
+     - Manejo de errores con mensajes de usuario
+
+7. INSTALACIÓN Y CONFIGURACIÓN
+   - Requisitos del sistema
+     - Python 3.8+
+     - PostgreSQL 12+
+     - Conexión a internet (para dependencias pip)
+
+   - Instalación de dependencias
+     - Crear entorno virtual: python -m venv venv
+     - Activar: source venv/bin/activate (Linux/Mac) o venv\Scripts\activate (Windows)
+     - Instalar: pip install -r requirements.txt
+
+   - Configuración de base de datos
+     - Crear base de datos PostgreSQL vacía
+     - Configurar variables de entorno en archivo .env:
+       DB_HOST=localhost
+       DB_NAME=posada_db
+       DB_USER=postgres
+       DB_PASSWORD=tu_password
+       DB_PORT=5432
+       JWT_SECRET=tu_clave_secreta_segura
+
+   - Variables de entorno
+     - Ver sección 3 para lista completa
+     - Archivo .env debe estar en raíz del proyecto
+     - No commitear .env a control de versiones
+
+8. EJECUCIÓN DEL SISTEMA
+   - Comandos para iniciar
+     - Desarrollo: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+     - Producción: uvicorn main:app --host 0.0.0.0 --port 8000
+     - Con variables de entorno: export $(cat .env | xargs) && uvicorn main:app --reload
+
+   - Verificación de funcionamiento
+     - API docs: http://localhost:8000/docs (Swagger UI)
+     - Homepage: http://localhost:8000/
+     - Logs: Revisar archivos en logs/app.log y logs/errors.log
+     - Base de datos: Verificar conexión y tablas creadas automáticamente
+
+9. CONSIDERACIONES DE DESARROLLO
+   - Patrones utilizados
+     - Repository pattern: Separación de lógica de BD en config/database_operations.py
+     - Dependency injection: FastAPI para autenticación JWT
+     - Factory pattern: Configuración de logging y BD
+     - MVC simplificado: Modelos, API, Vistas
+
+   - Mejores prácticas
+     - Validación de entrada con Pydantic
+     - Hashing seguro de contraseñas con bcrypt
+     - Logging estructurado con niveles apropiados
+     - Manejo de errores consistente con try/except
+     - Transacciones de BD con commit/rollback
+     - Configuración externa con variables de entorno
+     - Documentación de código con docstrings
+
+   - Áreas de mejora identificadas
+     - Implementar tests unitarios e integración
+     - Agregar rate limiting a endpoints
+     - Implementar refresh tokens JWT
+     - Mejorar manejo de sesiones frontend
+     - Agregar validación de email real
+     - Implementar notificaciones por email/WhatsApp
+     - Agregar paginación a listados
+     - Mejorar UX con framework frontend (React/Vue)
+     - Implementar CI/CD pipeline
+     - Agregar monitoreo y métricas (Prometheus)
+10. CAMBIOS RECIENTES
+
+   Fecha: 2025-10-18
+
+   - Eliminación de logs del sistema en la salida del terminal
+     Cambios realizados en config/logging_config.py:
+     - Establecer el nivel del logger raíz a WARNING
+     - Remover el handler de consola del logger raíz
+     Razón: Para evitar que los logs INFO/DEBUG aparezcan en el terminal.
+     Resultado: Los logs INFO/DEBUG ya no aparecen en el terminal.
