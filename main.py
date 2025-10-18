@@ -3,7 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from api import crear_usuario, autenticar_creacion_usuario, reservas, login
+from api import crear_usuario, autenticar_creacion_usuario, reservas, login, usuarios
 from dotenv import load_dotenv
 from config.logging_config import logger
 import os
@@ -57,6 +57,10 @@ def crear_usuario_page():
 def crear_reserva():
     return FileResponse('public/pages/crear_reserva/crear_reserva.html')
 
+@app.get("/gestion_usuarios")
+def gestion_usuarios():
+    return FileResponse('public/pages/gestion_usuarios/gestion_usuarios.html')
+
 app.mount("/static", StaticFiles(directory='public'), name='static')
 
 # Incluir routers
@@ -64,5 +68,6 @@ app.include_router(crear_usuario.router, prefix="/usuarios", tags=["Usuarios"])
 app.include_router(autenticar_creacion_usuario.router, prefix="/autenticar_creacion_usuario", tags=["Autenticación"])
 app.include_router(reservas.router, prefix="/api", tags=["Reservas"])
 app.include_router(login.router, prefix="/api", tags=["Autenticación"])
+app.include_router(usuarios.router, prefix="/api", tags=["Usuarios"])
 
 logger.info(f"FastAPI debug mode enabled: {app.debug}")
