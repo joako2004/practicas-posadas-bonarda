@@ -64,3 +64,5 @@ local.db
 *.bak
 *.swp
 *.swo
+
+MANUAL.txt
