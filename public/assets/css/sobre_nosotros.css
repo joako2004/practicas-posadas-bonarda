@@ -20,7 +20,7 @@ html {
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Georgia', 'Times New Roman', serif;
     line-height: 1.6;
     scroll-behavior: smooth;
     height: 100vh;
@@ -130,7 +130,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto auto;
-    gap: 10px;
+    gap: 15px;
     height: 100%;
 }
 
@@ -144,7 +144,7 @@ body {
     font-size: 16px;
     text-align: center;
     transition: transform 0.3s ease;
-    height: 15vh;
+    height: 30vh;
     min-height: 100px;
 }
 
@@ -161,8 +161,8 @@ body {
 
 .image-placeholder.large {
     grid-column: 1 / -1;
-    height: 30vh;
-    min-height: 150px;
+    height: 50vh;
+    min-height: 100px;
 }
 
 /* Sección Servicios - Área reducida */
@@ -185,7 +185,7 @@ body {
 .services-title {
     font-size: 42px;
     color: var(--bonarda-gray-dark);
-    margin-bottom: 80px;
+    margin-bottom: 20px;
     font-weight: 300;
     text-transform: uppercase;
     letter-spacing: 3px;
