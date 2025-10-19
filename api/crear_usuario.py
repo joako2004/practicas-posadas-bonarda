@@ -1,64 +1,123 @@
-from fastapi import APIRouter, Form, HTTPException
+from fastapi import APIRouter, HTTPException
 from models.user import UserCreate, UserResponse
-from config.database_operations import insert_usuario 
-from pydantic import EmailStr
-from datetime import datetime
+from config.database_operations import insert_usuario
+from pydantic import BaseModel, EmailStr
+from datetime import datetime, timedelta, timezone
 from config.logging_config import logger
-from passlib.context import CryptContext
+import bcrypt
+import jwt
+import os
+
+SECRET_KEY = os.getenv('JWT_SECRET', 'xPS9pT9NLXy42Q_DSHL-oYuA8WmEZoW13Kf6GvvMUW0')
+ALGORITHM = 'HS256'
+
+class UserCreateRequest(BaseModel):
+    nombre: str
+    apellido: str
+    dni: str
+    cuil_cuit: str
+    email: EmailStr
+    telefono: str
+    password: str
 
 router = APIRouter()
 
-# Configuraciones para el hashing de contraseñas
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-@router.post("/crear", response_model=UserResponse)
-async def crear_usuario(
-    nombre: str = Form(...),
-    apellido: str = Form(...),
-    dni: str = Form(...),
-    cuil_cuit: str = Form(...),
-    email: EmailStr = Form(...),
-    telefono: str = Form(...),
-    password: str = Form(...,)
-):
+@router.post("/crear")
+async def crear_usuario(request: UserCreateRequest):
     try:
-        # Validación corregida
-        if len(password) < 8:  # Cambiado de <= a 
+        password = request.password
+
+        logger.info(f'Password received: {repr(password)}, len chars: {len(password)}, len bytes: {len(password.encode("utf-8"))}')
+
+        # Validate plain password with UserCreate before hashing
+        try:
+            user_data = UserCreate(
+                nombre=request.nombre,
+                apellido=request.apellido,
+                dni=request.dni,
+                cuil_cuit=request.cuil_cuit,
+                email=request.email,
+                telefono=request.telefono,
+                password=password
+            )
+            logger.info("DEBUG: UserCreate validation passed with plain password")
+        except Exception as e:
+            logger.error(f"DEBUG: UserCreate validation failed: {type(e).__name__}: {str(e)}")
             raise HTTPException(
                 status_code=400,
-                detail='La contraseña debe tener al menos 8 caracteres'
+                detail=str(e)
             )
-    
-        # Hash la contraseña
-        hashed_password = pwd_context.hash(password)
+
+        # Hash the password after validation
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+        # Update user_data with hashed password for insertion
+        user_data.password = hashed_password
         
-        # CRÍTICO: Usar la contraseña hasheada
-        user_data = UserCreate(
-            nombre=nombre,
-            apellido=apellido,
-            dni=dni,
-            cuil_cuit=cuil_cuit,
-            email=email,
-            telefono=telefono,
-            password=hashed_password  # ✅ CORRECTO - usar el hash
-        )
-        
+        logger.info(f"🔍 DIAGNOSTIC - About to call insert_usuario with data: {user_data.model_dump(exclude={'password'})}")
         user_id = insert_usuario(user_data)
+        logger.info(f"🔍 DIAGNOSTIC - insert_usuario returned: type={type(user_id)}, value={user_id if not isinstance(user_id, dict) else user_id}")
+
+        if isinstance(user_id, dict):
+            # Handle error details from insert_usuario
+            error_type = user_id.get("type")
+            if error_type in ["duplicate_email", "duplicate_dni", "duplicate_cuil_cuit", "duplicate_constraint"]:
+                raise HTTPException(status_code=422, detail=user_id["error"])
+            else:
+                raise HTTPException(status_code=500, detail=user_id["error"])
+
+        logger.info(f"🔍 DEBUG - User created with ID {user_id}, DB_HOST={os.getenv('DB_HOST', 'localhost')}, DB_NAME={os.getenv('DB_NAME', 'posada_db')}")
+
+        # Generar token JWT
+        logger.debug(f"JWT_SECRET used for encoding in crear_usuario: '{SECRET_KEY}' (length: {len(SECRET_KEY)})")
+        token_data = {"sub": str(user_id), "exp": datetime.now(timezone.utc) + timedelta(days=30)}
+        token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+        logger.debug(f"Generated token in crear_usuario (first 50 chars): {token[:50]}...")
+
+        logger.info(f'Usuario creado exitosamente con ID {user_id}')
         
-        if not user_id:
-            raise HTTPException(status_code=500, detail="Error creando usuario")
-        
-        return UserResponse(
-            id=user_id, 
-            **user_data.model_dump(exclude={'password'}), 
-            activo=True, 
-            fecha_registro=datetime.now()
-        )
+        # Log para debugging - construir respuesta paso a paso
+        user_response = None
+        try:
+            logger.info(f'Construyendo UserResponse con id={user_id}')
+            logger.info(f'user_data.model_dump(exclude={{password}}): {user_data.model_dump(exclude={"password"})}')
+
+            user_response = UserResponse(
+                id=user_id,
+                **user_data.model_dump(exclude={'password'}),
+                activo=True,
+                fecha_registro=datetime.now(timezone.utc)
+            )
+            logger.info(f'UserResponse creado exitosamente: {user_response}')
+
+        except Exception as e:
+            logger.error(f'Error construyendo UserResponse: {type(e).__name__}: {str(e)}')
+            logger.error(f'Traceback completo:', exc_info=True)
+            user_response = {
+                "id": user_id,
+                "nombre": request.nombre,
+                "apellido": request.apellido,
+                "dni": request.dni,
+                "cuil_cuit": request.cuil_cuit,
+                "email": request.email,
+                "telefono": request.telefono,
+                "activo": True,
+                "fecha_registro": datetime.now(timezone.utc)
+            }
+
+        response_dict = {
+            "user": user_response,
+            "token": token
+        }
+        logger.info(f'Response dict creado: {type(response_dict)}')
+
+        return response_dict
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f'Error en registro: {e}')  # Typo corregido
+        logger.error(f'🔍 DIAGNOSTIC - Unhandled exception in crear_usuario: type={type(e).__name__}, message={str(e)}')
+        logger.error(f'Error en registro: {e}', exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail='Error interno del servidor'
+            detail='Error interno del servidor. Por favor, intenta de nuevo'
         )

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/assets/css/crear_reserva.css">
+    <title>Crear Reservas</title>
+</head>
+<body>
+    <body>
+    <h1>Gestión de Reservas de la Posada</h1>
+    <button id="logout-btn">Cerrar Sesión</button>
+
+    <section>
+        <h2>Tus Reservas</h2>
+        <p id="no-reservas">No tienes reservas aún.</p>
+        <ul id="reservas"></ul>
+    </section>
+
+    <section>
+        <h2>Crear Nueva Reserva</h2>
+        <form id="reserva-form">
+            <label>Fecha de Entrada:</label>
+            <input type="date" name="fecha_check_in" required min="">
+            <label>Fecha de Salida:</label>
+            <input type="date" name="fecha_check_out" required>
+            <label>Cantidad de habitaciones:</label>
+            <input type="number" name="cantidad_habitaciones" min="1" max="4" required>
+            <button type="submit">Enviar Reserva</button>
+        </form>
+    </section>
+
+    <script>
+        // Set min date for check-in to today
+        const today = new Date().toISOString().split('T')[0];
+        document.querySelector('[name="fecha_check_in"]').min = today;
+
+        // Dynamic min for check-out
+        const fechaCheckIn = document.querySelector('[name="fecha_check_in"]');
+        const fechaCheckOut = document.querySelector('[name="fecha_check_out"]');
+        fechaCheckIn.addEventListener('change', () => {
+            const minSalida = new Date(fechaCheckIn.value);
+            minSalida.setDate(minSalida.getDate() + 2);
+            fechaCheckOut.min = minSalida.toISOString().split('T')[0];
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/static/assets/js/crear_reserva.js"></script>
+</body>
+</html>

@@ -5,8 +5,8 @@ import re
 class UserBase(BaseModel):
     nombre: str = Field(..., min_length=2)
     apellido: str = Field(..., min_length=2)
-    dni: str = Field(..., min_length=7, max_length=8)  # DNI argentino 7-8 dígitos
-    cuil_cuit: str = Field(..., min_length=11, max_length=13)
+    dni: str = Field(..., min_length=7, max_length=8)
+    cuil_cuit: str = Field(..., min_length=10, max_length=13)
     email: EmailStr = Field(...)
     telefono: str = Field(..., min_length=8, max_length=15)
     
@@ -21,8 +21,8 @@ class UserBase(BaseModel):
     @classmethod
     def validar_cuil_cuit(cls, v):
         cuil_limpio = v.replace('-', '').replace(' ', '')
-        if not cuil_limpio.isdigit() or len(cuil_limpio) != 11:
-            raise ValueError('CUIL/CUIT debe tener 11 dígitos (XX-XXXXXXXX-X)')
+        if not cuil_limpio.isdigit() or len(cuil_limpio) < 10 or len(cuil_limpio) > 13:
+            raise ValueError('CUIL/CUIT debe tener entre 10 y 13 dígitos')
         return v
     
     @field_validator('telefono')
@@ -34,19 +34,22 @@ class UserBase(BaseModel):
         return v
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=8)
+    password: str = Field(..., min_length=8, max_length=72)  # Agregado max_length
     
     @field_validator('password')
     @classmethod
     def validar_password(cls, v):
+        if len(v) > 72:
+            raise ValueError('La contraseña debe tener menos de 72 caracteres')
         if len(v) < 8:
             raise ValueError('La contraseña debe tener al menos 8 caracteres')
         if not re.search(r'[A-Z]', v):
             raise ValueError('La contraseña debe contener al menos una mayúscula')
         if not re.search(r'[a-z]', v):
             raise ValueError('La contraseña debe contener al menos una minúscula')
-        if not re.search(r'\d', v):
-            raise ValueError('La contraseña debe contener al menos un número')
+        # Comentado para permitir contraseñas sin números
+        # if not re.search(r'\d', v):
+        #     raise ValueError('La contraseña debe contener al menos un número')
         return v
 
 class UserInDB(UserBase):

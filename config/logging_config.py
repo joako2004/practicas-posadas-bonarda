@@ -20,6 +20,15 @@ def setup_logger():
         format='%(asctime)s - %(levelname)s - %(name)s - %(funcName)s:%(lineno)d - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
+
+    # Remove console handler from root logger to prevent DEBUG/INFO logs on console
+    root_logger = logging.getLogger()
+    for handler in root_logger.handlers[:]:
+        if isinstance(handler, logging.StreamHandler):
+            root_logger.removeHandler(handler)
+
+    # Set root logger level to WARNING
+    root_logger.setLevel(logging.WARNING)
     
     # Logger principal
     logger = logging.getLogger('Posada')
@@ -45,7 +54,7 @@ def setup_logger():
     
     # Handler para consola (útil durante desarrollo)
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)  # Solo INFO y superiores en consola
+    console_handler.setLevel(logging.ERROR)  # Solo ERROR y superiores en consola
     console_handler.setFormatter(
         logging.Formatter(
             '%(asctime)s - %(levelname)s - %(message)s',

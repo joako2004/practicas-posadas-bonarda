@@ -1,0 +1,19 @@
+/* Basic styling for reservation form */
+#reserva-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+    margin: 20px auto;
+}
+#reserva-form label {
+    font-weight: bold;
+}
+#reserva-form input,
+#reserva-form button {
+    padding: 8px;
+    font-size: 16px;
+}
+#no-reservas {
+    color: red;
+}

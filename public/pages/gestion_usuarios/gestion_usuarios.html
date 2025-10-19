@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - Bonarda Posadas</title>
+    <link rel="stylesheet" href="/static/assets/css/crear_cuenta.css">
+    <link rel="stylesheet" href="/static/assets/css/gestion_usuarios.css">
+</head>
+<body>
+    <div class="browser-mockup">
+        <div class="browser-header">
+            <div class="browser-controls">
+                <span class="control back">←</span>
+                <span class="control forward">→</span>
+                <span class="control refresh">↻</span>
+            </div>
+            <div class="address-bar">www.bonardaposadas.com</div>
+            <div class="browser-menu"></div>
+        </div>
+
+        <div class="page-content">
+            <div class="form-container">
+                <div class="form-card">
+                    <h1>GESTIÓN DE USUARIOS</h1>
+
+                    <div class="users-table-container">
+                        <table class="users-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <!-- User data will be populated here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="loading-message" class="loading-message">Cargando usuarios...</div>
+                    <div id="error-message" class="error-message" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit User Modal -->
+        <div id="edit-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeEditModal()">&times;</span>
+                <h2>Editar Usuario</h2>
+                <form id="edit-form">
+                    <input type="hidden" id="edit-user-id">
+                    <div class="form-group">
+                        <label for="edit-nombre">Nombre:</label>
+                        <input type="text" id="edit-nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-apellido">Apellido:</label>
+                        <input type="text" id="edit-apellido" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-email">Email:</label>
+                        <input type="email" id="edit-email" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" onclick="closeEditModal()">Cancelar</button>
+                        <button type="submit" class="save-btn">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="/static/assets/js/gestion_usuarios.js"></script>
+</body>
+</html>
