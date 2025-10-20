@@ -61,6 +61,10 @@ def crear_reserva():
 def gestion_usuarios():
     return FileResponse('public/pages/gestion_usuarios/gestion_usuarios.html')
 
+@app.get("/sobre_nosotros")
+def sobre_nosotros():
+    return FileResponse('public/pages/sobre_nosotros/sobre_nosotros.html')
+
 app.mount("/static", StaticFiles(directory='public'), name='static')
 
 # Incluir routers
