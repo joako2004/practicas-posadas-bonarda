@@ -65,6 +65,10 @@ def gestion_usuarios():
 def sobre_nosotros():
     return FileResponse('public/pages/sobre_nosotros/sobre_nosotros.html')
 
+@app.get("/galeria")
+def galeria():
+    return FileResponse('public/pages/galeria/galeria.html')
+
 app.mount("/static", StaticFiles(directory='public'), name='static')
 
 # Incluir routers
