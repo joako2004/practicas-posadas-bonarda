@@ -1,0 +1,165 @@
+:root {
+    --beige: #bfae8f;
+    --beige-opaque: rgba(191, 174, 143, 0.88);
+    --text: #6a6156;
+    --nav-height: 76px;
+    --background: #f6f4f1;
+    font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    height: 100vh;
+}
+
+body {
+    margin: 0;
+    color: var(--text);
+    background-color: var(--background);
+}
+
+.hero {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: visible;
+    background-image: url('../../assets/images/sala_1.jpg');
+    background-size: cover;
+    background-position: center center;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:linear-gradient(rgba(0,0,0,0.03), rgba(0,0,0,0.06));
+    pointer-events: none;
+    z-index: -1;
+}
+
+.nav-pill {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 18px;
+    background-color: var(--beige);
+    border: 1px solid rgba(0,0,0,0.1);
+    padding: 17px 43px;
+    border-radius: 34px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 840px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    z-index: 10;
+}
+
+.brand {
+    font-weight:700;
+    letter-spacing:1px;
+    padding-right:14px;
+    border-right:1px solid rgba(0,0,0,0.06);
+    color: black;
+}
+
+a {
+  text-decoration: none;  
+  color: inherit;
+  transition: transform 0.2s ease-in-out;
+}
+
+a:hover {
+  transform: scale(1.1);
+}
+
+.nav-pill a{
+  color:#000000;
+  text-decoration:none;
+  font-size:15px
+}
+
+.nav-pill a.cta{
+  margin-left:12px;
+  padding:8px 12px;
+  border-radius:10px;
+  background:transparent;
+  border:1px solid rgba(0,0,0,0.06);
+}
+
+.nav-pill nav {
+  display: flex;
+  justify-content: space-between;
+  flex: 1; 
+  gap: 12px; 
+}
+
+.cta-hero{
+  display: inline-block;
+  position:relative;
+  z-index:2;
+  background:var(--beige);
+  padding:18px 34px;
+  border-radius:12px;
+  font-weight:700;
+  letter-spacing:0.6px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.18);
+  margin-top:300px; 
+  color: #000000;
+}
+
+
+.full-screen-container-nav {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+}
+
+.full-screen-container{
+  width:100%;
+  min-height:100vh;
+  position:relative;
+}
+
+@media (max-width:720px){
+  .nav-pill{
+    left:0;
+    transform:none;
+    top:0;
+    width:100%;
+    justify-content:space-between;
+    padding:12px
+  }
+  .cta-hero{
+    padding:14px 18px;
+    margin-top:150px;
+  }
+}
+
+.footer-sim{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:22px 0;
+  width:100%;
+  position:absolute;
+  bottom:0;
+  left:0;
+  background:rgba(246,244,241,0.9); /* semi-transparente para mostrar imagen */
+}
+
+.footer-sim p{
+  margin:0;
+  padding:6px 12px;
+  color:#6a6156;
+  font-family:Arial,Helvetica,sans-serif;
+  text-shadow:0 1px 2px rgba(255,255,255,0.8);
+}
