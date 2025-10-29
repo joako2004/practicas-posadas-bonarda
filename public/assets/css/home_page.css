@@ -114,6 +114,15 @@ a:hover {
   box-shadow:0 10px 30px rgba(0,0,0,0.18);
   margin-top:300px; 
   color: #000000;
+  
+  /* Estado inicial para la animación */
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+/* Excepción para el hover del botón hero */
+.cta-hero:hover {
+  transform: translateY(0) scale(1.05);
 }
 
 
