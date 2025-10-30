@@ -1,5 +1,5 @@
 document.querySelector('.registration-form').addEventListener('submit', async function(e) {
-    e.preventDefault(); // Evita submit tradicional
+    e.preventDefault(); // Evita submit tradicional recargando la página
 
     // Verifica contraseñas coinciden
     const password = document.getElementById('password').value;
@@ -63,7 +63,7 @@ document.querySelector('.registration-form').addEventListener('submit', async fu
         password: document.getElementById('password').value || ""
     };
 
-    console.log('DEBUG: Data to send for user creation:', data);
+    console.log('DEBUG: Datos para la creación del usuario:', data);
 
     try {
         // Crear usuario

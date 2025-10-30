@@ -31,13 +31,11 @@ async def login(request: Request):
     """
     Autenticar usuario y retornar JWT token
     """
-    # Log raw request details
     logger.info(f"🔍 DIAGNOSTIC - RAW REQUEST RECEIVED")
     logger.info(f"🔍 DIAGNOSTIC - Method: {request.method}")
     logger.info(f"🔍 DIAGNOSTIC - URL: {request.url}")
     logger.info(f"🔍 DIAGNOSTIC - Content-Type: {request.headers.get('content-type', 'NOT SET')}")
     
-    # Read and log the raw body
     try:
         body = await request.body()
         logger.info(f"🔍 DIAGNOSTIC - Raw body length: {len(body)} bytes")
@@ -46,9 +44,8 @@ async def login(request: Request):
         logger.error(f"🔍 DIAGNOSTIC - Could not read raw body: {e}")
         raise HTTPException(status_code=400, detail="Could not read request body")
     
-    # Parse form data manually
     try:
-        from urllib.parse import parse_qs
+        from urllib.parse import parse_qs # Función para parsear strings
         body_str = body.decode('utf-8')
         form_data = parse_qs(body_str)
         logger.info(f"🔍 DIAGNOSTIC - Parsed form data: {form_data}")
@@ -72,7 +69,6 @@ async def login(request: Request):
             logger.error(f"Intento de login fallido: usuario {username} no encontrado o credenciales inválidas")
             raise HTTPException(status_code=401, detail="Credenciales inválidas")
 
-        # Crear token JWT
         secret_key = os.getenv('JWT_SECRET', 'xPS9pT9NLXy42Q_DSHL-oYuA8WmEZoW13Kf6GvvMUW0')
         logger.debug(f"JWT_SECRET used for encoding: '{secret_key}' (length: {len(secret_key)})")
         payload = {

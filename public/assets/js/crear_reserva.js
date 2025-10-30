@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
 
-    // Show form since logged in
     if (crearReservaSection) crearReservaSection.style.display = 'block';
 
     try {
@@ -82,7 +81,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         reservasList.style.display = 'none';
     }
 
-    // Handle reservation form submission
     if (reservaForm) {
         reservaForm.addEventListener('submit', async function(e) {
             e.preventDefault();

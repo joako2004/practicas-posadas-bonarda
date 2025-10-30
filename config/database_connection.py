@@ -37,7 +37,9 @@ def verify_and_create_database(host, user, password, port, database_name):
         exists = admin_cursor.fetchone()
 
         if not exists:
-            # Crear la base de datos
+            """
+            Crear la base de datos
+            """
             logger.warning(f"Base de datos '{database_name}' no existe. Creándola...")
             admin_cursor.execute(f'CREATE DATABASE "{database_name}"')
             logger.info(f"Base de datos '{database_name}' creada exitosamente")

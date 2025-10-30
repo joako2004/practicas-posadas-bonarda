@@ -10,33 +10,29 @@ from config.database_operations import execute_query, insert_reserva
 from config.database_config import get_database_config, validate_database_config
 from dotenv import load_dotenv
 import os
-
-# Load environment variables from .env file
-load_dotenv()
 # from twilio.rest import Client  # Descomentar si usas Twilio
+
+load_dotenv()
 
 router = APIRouter()
 
-# Configuración
 SECRET_KEY = os.getenv('JWT_SECRET', 'xPS9pT9NLXy42Q_DSHL-oYuA8WmEZoW13Kf6GvvMUW0')
 ALGORITHM = 'HS256'
 logger.debug(f"JWT_SECRET used for decoding: '{SECRET_KEY}' (length: {len(SECRET_KEY)})")
 DB_CONFIG = get_database_config()
 
-# Debug logging for database config
 logger.debug(f"DB_CONFIG loaded: host={DB_CONFIG['host']}, database={DB_CONFIG['database']}, user={DB_CONFIG['user']}, port={DB_CONFIG['port']}")
 logger.debug(f"DB_PASSWORD from env: {'SET' if DB_CONFIG['password'] else 'NOT SET'}")
 if not DB_CONFIG['password']:
-    logger.warning("DB_PASSWORD is not set! This will cause authentication failure.")
+    logger.warning("DB_PASSWORD no seteada")
 
-# Validate database config
 is_valid, validation_msg = validate_database_config(DB_CONFIG)
 if not is_valid:
-    logger.error(f"Database config validation failed: {validation_msg}")
+    logger.error(f"Falló en la configuración de la base de datos: {validation_msg}")
 else:
-    logger.info("Database config validation passed.")
+    logger.info("Configuración de la base de datos válida")
 
-# Twilio (comentado)
+# Twilio 
 # TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "tu_twilio_account_sid")
 # TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "tu_twilio_auth_token")
 # TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
@@ -50,9 +46,10 @@ security = HTTPBearer()
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
-        logger.debug(f"Token received (first 50 chars): {token[:50]}...")
+        logger.debug(f"Token recibido (primeros 50 chars): {token[:50]}...")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get('sub')
+        # user_id: str = payload.get('sub')
+        user_id: str | None = payload.get('sub')
         exp = payload.get('exp')
         current_time = datetime.utcnow().timestamp()
         logger.debug(f"Token payload: sub={user_id}, exp={exp}, current_time={current_time}")
@@ -142,7 +139,7 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         user_email = user['email']
 
-        # Calcular precio_total (temporal)
+        # Calcular precio_total (temporal ya que el precio es modificable)
         dias = (reserva.fecha_check_out - reserva.fecha_check_in).days
         precio_total = dias * reserva.cantidad_habitaciones * 100.0
 
@@ -174,7 +171,7 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
         connection.close()
 
         # Log para notificación manual vía WhatsApp
-        logger.info(f"Nueva reserva pendiente: ID {reserva_id}, Contacto: {user_email}, Fechas: {reserva.fecha_check_in} a {reserva.fecha_check_out}, Habitaciones: {reserva.cantidad_habitaciones}. Contactar vía WhatsApp para pago.")
+        # logger.info(f"Nueva reserva pendiente: ID {reserva_id}, Contacto: {user_email}, Fechas: {reserva.fecha_check_in} a {reserva.fecha_check_out}, Habitaciones: {reserva.cantidad_habitaciones}. Contactar vía WhatsApp para pago.")
 
         # Enviar mensaje WhatsApp (comentado)
         # try:
@@ -214,7 +211,7 @@ async def get_reservas_pendientes():
         logger.error(f"Error en GET /api/reservas/pendientes: {str(e)}")
         raise HTTPException(status_code=500, detail="Error al obtener reservas pendientes")
 
-# GET /api/disponibilidad - Obtener reservas para calendario
+# GET /api/disponibilidad - Obtener reservas para calendario interactivo -> Pendiente
 @router.get("/disponibilidad")
 async def get_disponibilidad(start_date: date, end_date: date):
     try:

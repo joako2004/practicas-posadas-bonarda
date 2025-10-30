@@ -10,12 +10,11 @@ import os
 
 DB_CONFIG = get_database_config()
 
-# Validate database config
 is_valid, validation_msg = validate_database_config(DB_CONFIG)
 if not is_valid:
-    logger.error(f"Database config validation failed: {validation_msg}")
+    logger.error(f"Falló en la configuración de la base de datos: {validation_msg}")
 else:
-    logger.info("Database config validation passed.")
+    logger.info("Configuración de la base de datos válida")
 
 
 # Pydantic models
@@ -25,7 +24,7 @@ class UserListResponse(BaseModel):
     apellido: str
     email: str
 
-    class Config:
+    class Config: # para uso de un ORM
         from_attributes = True
 
 class UserUpdateRequest(BaseModel):
@@ -79,33 +78,33 @@ async def delete_usuario(user_id: int):
 
 
         # Verificar si el usuario tiene reservas activas
-        logger.info(f"Checking active reservations for user {user_id}...")
+        logger.info(f"Revisando reservas activas para el usuario con ID: {user_id}...")
         query = """
             SELECT COUNT(*) FROM reservas
             WHERE usuario_id = %s AND estado NOT IN ('Cancelada', 'Finalizada')
         """
-        logger.info(f"Executing query: {query.strip()} with user_id: {user_id}")
+        logger.info(f"Ejecutando consulta {query.strip()} para usuario con ID: {user_id}")
         cursor.execute(query, (user_id,))
-        logger.info("Query executed successfully")
+        logger.info("Consulta exitosa")
         result = cursor.fetchone()
-        logger.info(f"cursor.fetchone() result: {result}")
+        logger.info(f"cursor.fetchone(): {result}")
         if result is None:
-            logger.error("cursor.fetchone() returned None - this should not happen with COUNT(*)")
+            logger.error("cursor.fetchone() retorna None - tno deberia pasar con COUNT(*)")
             active_reservations = 0
         else:
             active_reservations = result['count']
-        logger.info(f"Active reservations count: {active_reservations}")
+        logger.info(f"Reservas activas: {active_reservations}")
         if active_reservations > 0:
             cursor.close()
             connection.close()
-            logger.warning(f"Cannot delete user {user_id} - has {active_reservations} active reservations")
+            logger.warning(f"No se puede eliminar al usuario: {user_id} - tiene {active_reservations} reservas activas")
             raise HTTPException(status_code=400, detail="No se puede eliminar un usuario con reservas activas")
 
         # Marcar usuario como inactivo (soft delete)
-        logger.info(f"Soft deleting user {user_id}...")
+        logger.info(f"Usuario inactivo {user_id}...")
         cursor.execute("UPDATE usuarios SET activo = false WHERE id = %s", (user_id,))
         connection.commit()
-        logger.info(f"User {user_id} marked as inactive")
+        logger.info(f"Usuario {user_id} inactivo")
 
         cursor.close()
         connection.close()

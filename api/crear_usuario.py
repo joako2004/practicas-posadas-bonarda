@@ -48,10 +48,8 @@ async def crear_usuario(request: UserCreateRequest):
                 detail=str(e)
             )
 
-        # Hash the password after validation
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-        # Update user_data with hashed password for insertion
         user_data.password = hashed_password
         
         logger.info(f"🔍 DIAGNOSTIC - About to call insert_usuario with data: {user_data.model_dump(exclude={'password'})}")
@@ -59,7 +57,6 @@ async def crear_usuario(request: UserCreateRequest):
         logger.info(f"🔍 DIAGNOSTIC - insert_usuario returned: type={type(user_id)}, value={user_id if not isinstance(user_id, dict) else user_id}")
 
         if isinstance(user_id, dict):
-            # Handle error details from insert_usuario
             error_type = user_id.get("type")
             if error_type in ["duplicate_email", "duplicate_dni", "duplicate_cuil_cuit", "duplicate_constraint"]:
                 raise HTTPException(status_code=422, detail=user_id["error"])
@@ -68,7 +65,6 @@ async def crear_usuario(request: UserCreateRequest):
 
         logger.info(f"🔍 DEBUG - User created with ID {user_id}, DB_HOST={os.getenv('DB_HOST', 'localhost')}, DB_NAME={os.getenv('DB_NAME', 'posada_db')}")
 
-        # Generar token JWT
         logger.debug(f"JWT_SECRET used for encoding in crear_usuario: '{SECRET_KEY}' (length: {len(SECRET_KEY)})")
         token_data = {"sub": str(user_id), "exp": datetime.now(timezone.utc) + timedelta(days=30)}
         token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
