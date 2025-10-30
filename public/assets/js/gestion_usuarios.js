@@ -7,7 +7,6 @@ async function loadUsers() {
     const errorMessage = document.getElementById('error-message');
     const tableBody = document.getElementById('users-table-body');
 
-    // Show loading message
     loadingMessage.style.display = 'block';
     errorMessage.style.display = 'none';
     tableBody.innerHTML = '';
@@ -24,10 +23,8 @@ async function loadUsers() {
 
         const users = await response.json();
 
-        // Hide loading message
         loadingMessage.style.display = 'none';
 
-        // Populate table
         if (users.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">No hay usuarios registrados</td></tr>';
             return;
@@ -79,7 +76,6 @@ async function deleteUser(userId, userName) {
         console.log('Success result:', result);
         alert(result.message || 'Usuario eliminado exitosamente');
 
-        // Reload the users list
         loadUsers();
 
     } catch (error) {
