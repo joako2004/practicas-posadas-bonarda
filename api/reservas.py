@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import JWTError, jwt
+from jwt import decode as jwt_decode, PyJWTError
 from datetime import datetime, timedelta, date
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -47,7 +47,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     try:
         token = credentials.credentials
         logger.debug(f"Token recibido (primeros 50 chars): {token[:50]}...")
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt_decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         # user_id: str = payload.get('sub')
         user_id: str | None = payload.get('sub')
         exp = payload.get('exp')
@@ -58,7 +58,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token Inválido')
         logger.debug(f"Usuario autenticado: ID {user_id}")
         return {'id': int(user_id)}
-    except JWTError as e:
+    except PyJWTError as e:
         logger.error(f"Error decodificando token: {str(e)}")
         logger.error(f"Token that failed: {token[:100]}...")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token Inválido')
