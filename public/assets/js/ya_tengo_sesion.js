@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (tokenResponse.ok) {
                     const tokenData = await tokenResponse.json();
                     localStorage.setItem('token', tokenData.access_token);
-                    window.location.href = '../crear_reserva/crear_reserva.html';
+                    window.location.href = '/crear_reserva';
                 } else {
                     alert('Error al generar token de sesión');
                 }

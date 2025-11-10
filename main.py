@@ -60,6 +60,10 @@ def crear_usuario_page():
 def ya_tengo_sesion():
     return FileResponse("public/pages/ya_tengo_sesion/ya_tengo_sesion.html")
 
+@app.get("/login")
+def login_page():
+    return FileResponse("public/pages/login/login.html")
+
 @app.get("/crear_reserva")
 def crear_reserva():
     return FileResponse('public/pages/crear_reserva/crear_reserva.html')

@@ -78,8 +78,8 @@
                         </div>
                         
                         <button type="submit" class="submit-btn">CREAR CUENTA</button>
-                        
-                        <button type="button" class="submit-btn" id="login-toggle-btn">YA TENGO CUENTA</button>
+
+                        <button type="button" class="submit-btn" id="login-toggle-btn" onclick="window.location.href='/login'">YA TENGO CUENTA</button>
                     </form>
                     
                 </div>
@@ -162,18 +162,10 @@
                 });
             });
 
-            // Toggle between registration and login forms
-            const loginToggleBtn = document.getElementById('login-toggle-btn');
+            // Toggle between registration and login forms (only for register toggle button)
             const registerToggleBtn = document.getElementById('register-toggle-btn');
             const registrationForm = document.querySelector('.form-card:not(.login-form)');
             const loginForm = document.querySelector('.login-form');
-
-            if (loginToggleBtn) {
-                loginToggleBtn.addEventListener('click', function() {
-                    registrationForm.style.display = 'none';
-                    loginForm.style.display = 'block';
-                });
-            }
 
             if (registerToggleBtn) {
                 registerToggleBtn.addEventListener('click', function() {
