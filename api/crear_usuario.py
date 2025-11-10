@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from models.user import UserCreate, UserResponse
 from config.database_operations import insert_usuario
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ValidationError
 from datetime import datetime, timedelta, timezone
 from config.logging_config import logger
 import bcrypt
@@ -41,6 +41,16 @@ async def crear_usuario(request: UserCreateRequest):
                 password=password
             )
             logger.info("DEBUG: UserCreate validation passed with plain password")
+        except ValidationError as e:
+            logger.error(f"DEBUG: UserCreate validation failed: {type(e).__name__}: {str(e)}")
+            # Extract the first error message and remove "Value error, " prefix
+            error_msg = e.errors()[0]['msg'] if e.errors() else str(e)
+            if error_msg.startswith("Value error, "):
+                error_msg = error_msg[13:]  # Remove "Value error, " prefix
+            raise HTTPException(
+                status_code=400,
+                detail=error_msg
+            )
         except Exception as e:
             logger.error(f"DEBUG: UserCreate validation failed: {type(e).__name__}: {str(e)}")
             raise HTTPException(
