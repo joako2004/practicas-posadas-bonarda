@@ -21,8 +21,11 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     for error in exc.errors():
         field = '.'.join(str(loc) for loc in error['loc'])
         msg = error['msg']  # Mensaje de Pydantic o validator
+        # Customize email validation error message
+        if 'email' in field and 'valid email' in msg.lower():
+            msg = 'El formato de email es inválido'
         errors.append(f'Error en {field}: {msg}')
-    
+
     return JSONResponse(
         status_code=422,
         content={'detail': 'Datos inválidos. Por favor revise: ', 'errors': errors}
