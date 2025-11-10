@@ -26,7 +26,7 @@ document.querySelector('.login-form').addEventListener('submit', async function(
         const result = await response.json();
         alert('Inicio de sesión exitoso!');
         localStorage.setItem('token', result.access_token);
-        window.location.href = '/';  // Redirige a home
+        window.location.href = '/crear_reserva';  // Redirige a crear reserva
 
     } catch (error) {
         alert('Error de conexión: ' + error.message);
