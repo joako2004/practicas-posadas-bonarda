@@ -97,14 +97,19 @@ def insert_usuario(user_data):
 
         # Check for specific error types
         error_str = str(error)
-        if 'psycopg2' in str(type(error)) and 'IntegrityError' in error_str:
-            logger.error("DEBUG: Likely duplicate constraint violation (email, dni, or cuil_cuit)")
+        if 'UniqueViolation' in str(type(error)) or ('psycopg2' in str(type(error)) and 'IntegrityError' in error_str):
+            logger.error("DEBUG: Unique constraint violation detected")
+            # Check for specific field violations in order of priority
             if 'email' in error_str.lower():
                 return {"error": "El email ya está registrado", "type": "duplicate_email"}
             elif 'dni' in error_str.lower():
                 return {"error": "El DNI ya está registrado", "type": "duplicate_dni"}
             elif 'cuil_cuit' in error_str.lower():
                 return {"error": "El CUIL/CUIT ya está registrado", "type": "duplicate_cuil_cuit"}
+            elif 'telefono' in error_str.lower():
+                return {"error": "El teléfono ya está registrado", "type": "duplicate_telefono"}
+            elif 'nombre' in error_str.lower() and 'apellido' in error_str.lower():
+                return {"error": "Ya existe un usuario con el mismo nombre y apellido", "type": "duplicate_nombre_apellido"}
             else:
                 return {"error": "Violación de restricción de unicidad", "type": "duplicate_constraint", "details": error_str}
         else:

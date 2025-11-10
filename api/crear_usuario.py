@@ -76,7 +76,7 @@ async def crear_usuario(request: UserCreateRequest):
 
         if isinstance(user_id, dict):
             error_type = user_id.get("type")
-            if error_type in ["duplicate_email", "duplicate_dni", "duplicate_cuil_cuit", "duplicate_constraint"]:
+            if error_type in ["duplicate_email", "duplicate_dni", "duplicate_cuil_cuit", "duplicate_telefono", "duplicate_nombre_apellido", "duplicate_constraint"]:
                 raise HTTPException(status_code=422, detail=user_id["error"])
             else:
                 raise HTTPException(status_code=500, detail=user_id["error"])

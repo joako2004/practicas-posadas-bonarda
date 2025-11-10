@@ -54,10 +54,11 @@ def create_posada_tables(cursor, connection):
             dni VARCHAR(20) UNIQUE NOT NULL,
             cuil_cuit VARCHAR(13) UNIQUE NOT NULL,
             email VARCHAR(100) UNIQUE NOT NULL,
-            telefono VARCHAR(20),
+            telefono VARCHAR(20) UNIQUE,
             password VARCHAR(255) NOT NULL,
             fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            activo BOOLEAN DEFAULT TRUE
+            activo BOOLEAN DEFAULT TRUE,
+            UNIQUE(nombre, apellido)
         )
         """,
 
@@ -154,11 +155,53 @@ def create_posada_tables(cursor, connection):
 
         # Asegurar que la columna cuil_cuit existe en usuarios
         try:
-            cursor.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS cuil_cuit VARCHAR(13) UNIQUE")
+            cursor.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS cuil_cuit VARCHAR(13)")
             connection.commit()
             logger.info('✅ Columna cuil_cuit verificada/agregada en tabla usuarios')
         except Error as error:
             logger.error(f"❌ Error agregando columna cuil_cuit: {error}", exc_info=True)
+            connection.rollback()
+            return False
+
+        # Asegurar que la restricción UNIQUE existe para cuil_cuit
+        try:
+            cursor.execute("""
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_constraint
+                        WHERE conname = 'usuarios_cuil_cuit_unique'
+                        AND conrelid = 'usuarios'::regclass
+                    ) THEN
+                        ALTER TABLE usuarios ADD CONSTRAINT usuarios_cuil_cuit_unique UNIQUE (cuil_cuit);
+                    END IF;
+                END $$;
+            """)
+            connection.commit()
+            logger.info('✅ Restricción UNIQUE verificada para cuil_cuit')
+        except Error as error:
+            logger.error(f"❌ Error agregando restricción UNIQUE para cuil_cuit: {error}", exc_info=True)
+            connection.rollback()
+            return False
+
+        # Asegurar que la restricción UNIQUE existe para telefono
+        try:
+            cursor.execute("""
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_constraint
+                        WHERE conname = 'usuarios_telefono_unique'
+                        AND conrelid = 'usuarios'::regclass
+                    ) THEN
+                        ALTER TABLE usuarios ADD CONSTRAINT usuarios_telefono_unique UNIQUE (telefono);
+                    END IF;
+                END $$;
+            """)
+            connection.commit()
+            logger.info('✅ Restricción UNIQUE verificada para telefono')
+        except Error as error:
+            logger.error(f"❌ Error agregando restricción UNIQUE para telefono: {error}", exc_info=True)
             connection.rollback()
             return False
 
