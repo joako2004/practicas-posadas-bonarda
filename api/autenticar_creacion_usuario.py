@@ -12,12 +12,13 @@ router = APIRouter()
 templates = Jinja2Templates(directory="public/pages/crear_usuario")
 login_templates = Jinja2Templates(directory="public/pages/login")
 
-@router.get("/registrar", response_class=HTMLResponse)
-async def show_register_form(request: Request):
+@router.get("/registrar")
+async def redirect_to_login():
     """
-    Mostrar el formulario de registro
+    Redirigir a la página de login ya tengo sesion
     """
-    return templates.TemplateResponse("crear_usuario.html", {"request": request})
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/ya_tengo_sesion", status_code=302)
 
 @router.get("/login", response_class=HTMLResponse)
 async def show_login_form(request: Request):
@@ -81,6 +82,8 @@ async def login(request: Request):
 
         logger.info(f"Usuario {username} autenticado exitosamente")
         return {"access_token": token, "token_type": "bearer", "user": user}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error en login: {str(e)}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error interno del servidor")

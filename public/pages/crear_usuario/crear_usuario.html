@@ -79,7 +79,7 @@
                         
                         <button type="submit" class="submit-btn">CREAR CUENTA</button>
                         
-                        <button type="button" class="submit-btn" onclick="window.location.href='/autenticar_creacion_usuario/login'">YA TENGO CUENTA</button>
+                        <button type="button" class="submit-btn" id="login-toggle-btn">YA TENGO CUENTA</button>
                     </form>
                     
                 </div>
@@ -96,6 +96,7 @@
                             <input type="password" id="login-password" name="login-password" required>
                         </div>
                         <button type="submit" class="submit-btn">INICIAR SESIÓN</button>
+                        <button type="button" class="submit-btn" id="register-toggle-btn">CREAR CUENTA</button>
                     </form>
                 </div>
             </div>
@@ -160,6 +161,26 @@
                     togglePasswordVisibility(targetId);
                 });
             });
+
+            // Toggle between registration and login forms
+            const loginToggleBtn = document.getElementById('login-toggle-btn');
+            const registerToggleBtn = document.getElementById('register-toggle-btn');
+            const registrationForm = document.querySelector('.form-card:not(.login-form)');
+            const loginForm = document.querySelector('.login-form');
+
+            if (loginToggleBtn) {
+                loginToggleBtn.addEventListener('click', function() {
+                    registrationForm.style.display = 'none';
+                    loginForm.style.display = 'block';
+                });
+            }
+
+            if (registerToggleBtn) {
+                registerToggleBtn.addEventListener('click', function() {
+                    loginForm.style.display = 'none';
+                    registrationForm.style.display = 'block';
+                });
+            }
         });
     </script>
     <script src="/static/assets/js/crear_cuenta.js"></script>

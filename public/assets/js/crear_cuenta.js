@@ -120,3 +120,82 @@ document.querySelector('.registration-form').addEventListener('submit', async fu
         alert('Error de conexión: ' + error.message);
     }
 });
+
+// Handle login form submission
+document.getElementById('login-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const dni = document.getElementById('login-dni').value;
+    const password = document.getElementById('login-password').value;
+
+    // Basic validation
+    if (!dni || !password) {
+        alert('Por favor complete todos los campos');
+        return;
+    }
+
+    if (dni.length < 7 || dni.length > 8 || !/^\d+$/.test(dni)) {
+        alert('El DNI debe tener 7 u 8 dígitos');
+        return;
+    }
+
+    try {
+        console.log('DEBUG: Attempting login with DNI:', dni);
+
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                dni: dni,
+                password: password
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            let errorMsg = errorData.detail || 'Error desconocido';
+            if (errorData.errors) {
+                errorMsg += '\n' + errorData.errors.join('\n');
+            }
+            alert(errorMsg);
+            return;
+        }
+
+        const loginData = await response.json();
+        console.log('DEBUG: Login successful, received data:', loginData);
+
+        // Generate JWT token for the user (since the login endpoint doesn't return a token)
+        const tokenResponse = await fetch('/autenticar_creacion_usuario/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                username: loginData.user.email, // Use email as username
+                password: password
+            }).toString()
+        });
+
+        if (!tokenResponse.ok) {
+            const errorData = await tokenResponse.json();
+            console.log('DEBUG: Token generation failed:', errorData);
+            alert('Error al generar token de sesión: ' + (errorData.detail || 'Intenta de nuevo'));
+            return;
+        }
+
+        const tokenData = await tokenResponse.json();
+        console.log('DEBUG: Token generated successfully');
+
+        localStorage.setItem('token', tokenData.access_token);
+        console.log('DEBUG: Token stored in localStorage');
+
+        alert('Inicio de sesión exitoso!');
+        window.location.href = '/crear_reserva';
+
+    } catch (error) {
+        console.error('DEBUG: Login error:', error);
+        alert('Error de conexión: ' + error.message);
+    }
+});

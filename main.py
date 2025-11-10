@@ -56,6 +56,10 @@ def root():
 def crear_usuario_page():
     return FileResponse("public/pages/crear_usuario/crear_usuario.html")
 
+@app.get("/ya_tengo_sesion")
+def ya_tengo_sesion():
+    return FileResponse("public/pages/ya_tengo_sesion/ya_tengo_sesion.html")
+
 @app.get("/crear_reserva")
 def crear_reserva():
     return FileResponse('public/pages/crear_reserva/crear_reserva.html')
