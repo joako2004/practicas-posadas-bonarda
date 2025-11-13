@@ -1,19 +1,97 @@
-/* Basic styling for reservation form */
-#reserva-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-width: 400px;
-    margin: 20px auto;
+body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background-color: #A99F7F;
+    :root {
+    --bonarda-beige-light: #DCD6CA;
+    --bonarda-gray-light: #F0F0F0;
+    --bonarda-beige-medium: #;
+    --bonarda-beige-dark: #938C74;
+    --bonarda-gray-dark: #333333;
+    --bonarda-green-gray-light: #BFBF94;
+    --bonarda-green-olive: #596546;
+    --bonarda-green-gray-dark: #747C6C;
 }
-#reserva-form label {
-    font-weight: bold;
 }
-#reserva-form input,
-#reserva-form button {
+.reservas-box {
+    background: #D9D2B6;              /* tono más claro que la otra caja */
+    border: 2px solid #A99F7F;        /* combina con el tema */
+    border-radius: 12px;              /* bordes suaves */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+
+    height: 30px;  /* altura fija */
+
+    width: 150px;
+    margin: 40px auto;
+    margin-left: 10px;
+    padding: 20px;
+    padding-top: 10px;
+    text-align: center;               /* centra el texto */
+}
+.reservas-box:hover {
+    background: #e1dabc;  
+    transform: scale(1.02);
+    cursor: pointer;
+
+}
+.reservas-box h2 {
+    color: #596546;                   /* el mismo verde oscuro del tema */
+    margin: 0px;
+    margin-top: 0px;
+    padding: 0px;
+
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 18px;
+}
+
+.reservas-box p {
+    color: #444;
+    margin: 0px;
+    padding: 0px;
+    font-style: italic;
+    font-size: 14px;
+
+}
+.reserva-box {
+    background: #BFBF94;
+    border: 2px solid #847e6a;
+    border-radius: 10px;
+    box-shadow: 0 2px 11px rgba(0, 0, 0, 0.15);
+    width: 500px;
+    padding: 20px;
+    padding-top: 5px;
+    margin: 50px auto; /* centra horizontalmente */
+    margin-top: 0px;
+}
+.form-field {
+    margin-bottom: 15px;  /* separa cada campo */
+
+}
+
+.form-field label {
+    display: block;       /* que el label quede arriba del input */
+    margin-bottom: 5px;   /* pequeño espacio entre label y input */
+}
+
+.form-field input {
+    width: 95%;
     padding: 8px;
-    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
 }
-#no-reservas {
-    color: red;
+
+#logout-btn {
+    position: absolute;
+    top: 20px;      /* distancia desde arriba */
+    right: 50px;    /* distancia desde la derecha */
+    background-color: #596546;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+#logout-btn:hover {
+    background-color: #727d5e; /* color más claro al pasar el mouse */
 }
