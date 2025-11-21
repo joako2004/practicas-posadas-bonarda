@@ -17,7 +17,6 @@ class BookingBase(BaseModel):
     cantidad_habitaciones: int = Field(..., ge=1)
 
 
-# lo que manda el cliente
 class BookingCreate(BaseModel):
     fecha_check_in: date
     fecha_check_out: date
@@ -32,7 +31,6 @@ class BookingCreate(BaseModel):
         return self
 
 
-# lo que se guarda en la DB
 class BookingInDB(BookingBase):
     id: int
     precio_total: Decimal
@@ -43,6 +41,5 @@ class BookingInDB(BookingBase):
         from_attributes = True
 
 
-# lo que devuelve el backend
 class BookingResponse(BookingInDB):
     pass

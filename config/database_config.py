@@ -1,12 +1,8 @@
-# ==========================================
-# config/database_config.py - Configuración de base de datos
-# ==========================================
 import os
 import sys
 from dotenv import load_dotenv
 from .logging_config import logger
 
-# Load environment variables
 logger.info(f"Loading .env from current directory (CWD: {os.getcwd()})")
 load_dotenv()
 logger.info(f"DB_PASSWORD loaded: {bool(os.getenv('DB_PASSWORD'))}")
@@ -41,7 +37,6 @@ def validate_database_config(config):
         logger.error(error_msg)
         return False, error_msg
 
-    # Validar que el puerto sea numérico
     try:
         int(config['port'])
     except ValueError:

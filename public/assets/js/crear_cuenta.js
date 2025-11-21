@@ -1,5 +1,5 @@
 document.querySelector('.registration-form').addEventListener('submit', async function(e) {
-    e.preventDefault(); // Evita submit tradicional recargando la página
+    e.preventDefault();
 
     // Verifica contraseñas coinciden
     const password = document.getElementById('password').value;

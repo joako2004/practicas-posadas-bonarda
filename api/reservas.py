@@ -39,16 +39,13 @@ else:
 # ADMIN_WHATSAPP_NUMBER = os.getenv("ADMIN_WHATSAPP_NUMBER", "whatsapp:+numero_admin")
 # twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
-# Esquema de autenticación
 security = HTTPBearer()
 
-# Dependencia para obtener el usuario autenticado
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
         logger.debug(f"Token recibido (primeros 50 chars): {token[:50]}...")
         payload = jwt_decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        # user_id: str = payload.get('sub')
         user_id: str | None = payload.get('sub')
         exp = payload.get('exp')
         current_time = datetime.utcnow().timestamp()
@@ -63,7 +60,6 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
         logger.error(f"Token that failed: {token[:100]}...")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token Inválido')
 
-# GET /api/reservas - Obtener reservas del usuario autenticado
 @router.get("/reservas", response_model=list[BookingResponse])
 async def get_reservas(current_user: dict = Depends(get_current_user)):
     try:
@@ -92,7 +88,6 @@ async def get_reservas(current_user: dict = Depends(get_current_user)):
 async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     
-    # Validaciones adicionales
     try:
         if reserva.cantidad_habitaciones < 1 or reserva.cantidad_habitaciones > 4:
             raise HTTPException(status_code=400, detail="El número de habitaciones debe estar entre 1 y 4")
@@ -108,7 +103,6 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor(cursor_factory=RealDictCursor)
 
-        # Verificar disponibilidad con capacidad
         query = """
             SELECT SUM(cantidad_habitaciones) as total_habitaciones
             FROM reservas
@@ -124,7 +118,6 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
             connection.close()
             raise HTTPException(status_code=400, detail="No hay suficientes habitaciones disponibles en esas fechas")
 
-        # Obtener email del usuario para observaciones
         logger.info(f"🔍 DEBUG - DB_CONFIG in create_reserva: {DB_CONFIG}")
         logger.info(f"🔍 DEBUG - user_id from token: {user_id}")
         logger.debug(f"Attempting to fetch user with ID: {user_id}")
@@ -139,11 +132,9 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         user_email = user['email']
 
-        # Calcular precio_total (temporal ya que el precio es modificable)
         dias = (reserva.fecha_check_out - reserva.fecha_check_in).days
         precio_total = dias * reserva.cantidad_habitaciones * 100.0
 
-        # Insertar reserva
         observaciones = f"Contacto: {user_email}"
         reserva_id = insert_reserva(
             cursor, connection, user_id, reserva.fecha_check_in,
@@ -154,7 +145,6 @@ async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(ge
             connection.close()
             raise HTTPException(status_code=500, detail="Error al crear reserva")
 
-        # Obtener la reserva creada
         cursor.execute(
             """
             SELECT r.id, r.fecha_check_in AS fecha_entrada, r.fecha_check_out AS fecha_salida,

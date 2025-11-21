@@ -3,41 +3,32 @@ import logging.handlers
 import os
 from pathlib import Path
 
-# Obtener directorio del script
-script_dir = Path(__file__).parent.parent  # Sube un nivel si está en config/
+script_dir = Path(__file__).parent.parent 
 logs_dir = script_dir / 'logs'
 
-# Crear directorio de logs
 logs_dir.mkdir(exist_ok=True)
 
-# Configuración mejorada
 def setup_logger():
     """Configurar el sistema de logging"""
     
-    # Configuración básica para capturar todos los logs
     logging.basicConfig(
         level=logging.DEBUG,
         format='%(asctime)s - %(levelname)s - %(name)s - %(funcName)s:%(lineno)d - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
-    # Remove console handler from root logger to prevent DEBUG/INFO logs on console
     root_logger = logging.getLogger()
     for handler in root_logger.handlers[:]:
         if isinstance(handler, logging.StreamHandler):
             root_logger.removeHandler(handler)
 
-    # Set root logger level to WARNING
     root_logger.setLevel(logging.WARNING)
     
-    # Logger principal
     logger = logging.getLogger('Posada')
     logger.setLevel(logging.DEBUG)
     
-    # Limpiar handlers existentes
     logger.handlers.clear()
     
-    # Handler para archivo con rotación (evita archivos muy grandes)
     file_handler = logging.handlers.RotatingFileHandler(
         filename=logs_dir / 'app.log',
         maxBytes=10 * 1024 * 1024,  # 10MB máximo
@@ -52,9 +43,8 @@ def setup_logger():
         )
     )
     
-    # Handler para consola (útil durante desarrollo)
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.ERROR)  # Solo ERROR y superiores en consola
+    console_handler.setLevel(logging.ERROR) 
     console_handler.setFormatter(
         logging.Formatter(
             '%(asctime)s - %(levelname)s - %(message)s',
@@ -62,7 +52,6 @@ def setup_logger():
         )
     )
     
-    # Handler para errores críticos (archivo separado)
     error_handler = logging.FileHandler(
         filename=logs_dir / 'errors.log',
         encoding='utf-8'
@@ -76,19 +65,15 @@ def setup_logger():
         )
     )
     
-    # Agregar handlers al logger
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
     logger.addHandler(error_handler)
     
     return logger
 
-# Inicializar logger
 logger = setup_logger()
 
-# ==========================================
 # Funciones útiles adicionales
-# ==========================================
 
 def log_startup():
     """Log cuando la aplicación inicia"""

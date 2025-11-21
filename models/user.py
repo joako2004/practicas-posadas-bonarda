@@ -34,8 +34,7 @@ class UserBase(BaseModel):
         return v
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=8, max_length=72)  # Agregado max_length
-    
+    password: str = Field(..., min_length=8, max_length=72)
     @field_validator('password')
     @classmethod
     def validar_password(cls, v):
@@ -45,9 +44,6 @@ class UserCreate(UserBase):
             raise ValueError('La contraseña debe tener al menos 8 caracteres')
         if not (re.search(r'[A-Z]', v) and re.search(r'[a-z]', v)):
             raise ValueError('La contraseña debe contener al menos una mayúscula y una minúscula')
-        # Comentado para permitir contraseñas sin números
-        # if not re.search(r'\d', v):
-        #     raise ValueError('La contraseña debe contener al menos un número')
         return v
 
 class UserInDB(UserBase):

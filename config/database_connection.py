@@ -1,6 +1,3 @@
-# ==========================================
-# config/database_connection.py - Gestión de conexiones PostgreSQL
-# ==========================================
 import psycopg2
 from psycopg2 import Error
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
@@ -14,7 +11,6 @@ def verify_and_create_database(host, user, password, port, database_name):
     try:
         logger.info(f"Verificando existencia de base de datos: {database_name}")
 
-        # Conectar a la base de datos por defecto 'postgres' para verificar/crear
         admin_connection = psycopg2.connect(
             host=host,
             database="postgres",  # Base de datos por defecto de PostgreSQL
@@ -25,13 +21,12 @@ def verify_and_create_database(host, user, password, port, database_name):
 
         logger.debug("Conexión administrativa establecida con base de datos 'postgres'")
 
-        # Configurar para poder crear bases de datos
-        admin_connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT) # "ISOLATION_LEVEL_AUTOCOMMIT" se encarga de commitear las operaciones automáticamente
+        admin_connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT) 
+        
         admin_cursor = admin_connection.cursor()
 
-        # Verificar si la base de datos existe
         admin_cursor.execute(
-            "SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s", # para verificar la conexión, realiza una consulta al catálogo interno de postgresql
+            "SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s", 
             (database_name,)
         )
         exists = admin_cursor.fetchone()
@@ -48,7 +43,6 @@ def verify_and_create_database(host, user, password, port, database_name):
             logger.info(f"Base de datos '{database_name}' ya existe")
             log_database_connection(True, f"- Database '{database_name}' already exists")
 
-        # Cerrar conexión administrativa
         admin_cursor.close()
         admin_connection.close()
         logger.debug("Conexión administrativa cerrada")
@@ -65,13 +59,11 @@ def connect_postgresql():
     Establece conexión con base de datos PostgreSQL
     Verifica y crea la base de datos si no existe
     """
-    # Obtener configuración local
     config = get_database_config()
 
     try:
         logger.info("🔗 Iniciando proceso de conexión a PostgreSQL")
 
-        # Obtener y validar configuración
         config = get_database_config()
         is_valid, validation_message = validate_database_config(config)
 
@@ -79,7 +71,6 @@ def connect_postgresql():
             logger.error(f"❌ Configuración inválida: {validation_message}")
             return None, None
 
-        # Log de configuración (sin password)
         logger.info(f"📋 Configuración cargada:")
         logger.info(f"   - Host: {config['host']}")
         logger.info(f"   - Database: {config['database']}")
@@ -87,7 +78,6 @@ def connect_postgresql():
         logger.info(f"   - Port: {config['port']}")
         logger.info(f"   - Password: {'*' * len(config['password']) if config['password'] else 'NOT SET'}")
 
-        # Verificar y crear la base de datos si no existe
         logger.info('Verificando existencia de la base de datos...')
         if not verify_and_create_database(
             config['host'],
@@ -100,14 +90,10 @@ def connect_postgresql():
             log_database_connection(False, '- Database verification failed')
             return None, None
 
-        # Conectar a la base de datos específica
         logger.info(f'Conectando a la base de datos "{config["database"]}"...')
-        connection = psycopg2.connect(**config) # desempaquetar el objeto para obtener los atributos para la conexión
-
-        # Crear cursor para ejecutar consultas
+        connection = psycopg2.connect(**config) 
         cursor = connection.cursor()
 
-        # Verificar la conexión
         cursor.execute('SELECT version();')
         version = cursor.fetchone()
         logger.info("✅ Conexión exitosa a PostgreSQL")
@@ -121,7 +107,6 @@ def connect_postgresql():
         logger.error(f"Error al conectar con PostgreSQL: {error}", exc_info=True)
         log_database_connection(False, f"- Connection error: {error}")
 
-        # Ayuda específica para errores comunes
         if "authentication failed" in str(error).lower():
             logger.error("💡 Verifica que DB_PASSWORD esté configurado correctamente")
         elif "connection refused" in str(error).lower():
@@ -140,7 +125,6 @@ def verify_active_connection(connection):
         return False
 
     try:
-        # intentar ejecutar una consulta simple
         temp_cursor = connection.cursor()
         temp_cursor.execute('SELECT 1')
         temp_cursor.close()
@@ -158,7 +142,6 @@ def reconnect_if_needed(connection, cursor):
     if not verify_active_connection(connection):
         logger.warning("🔄 Conexión perdida. Intentando reconectar...")
 
-        # Cerrar recursos existentes
         if cursor:
             try:
                 cursor.close()
@@ -172,7 +155,6 @@ def reconnect_if_needed(connection, cursor):
             except:
                 pass
 
-        # Reconectar
         new_connection, new_cursor = connect_postgresql()
         if new_connection and new_cursor:
             logger.info('✅ Reconexión exitosa')
@@ -214,22 +196,17 @@ def get_connection_stats():
         return None
 
     try:
-        # Obtener información de la base de datos
         stats = {}
 
-        # Versión de PostgreSQL
         cur.execute("SELECT version()")
         stats['version'] = cur.fetchone()[0]
 
-        # Número de conexiones activas
         cur.execute("SELECT count(*) FROM pg_stat_activity")
         stats['active_connections'] = cur.fetchone()[0]
 
-        # Tamaño de la base de datos
         cur.execute("SELECT pg_size_pretty(pg_database_size(current_database()))")
         stats['database_size'] = cur.fetchone()[0]
 
-        # Estadísticas específicas del sistema de posada
         cur.execute("SELECT COUNT(*) FROM usuarios WHERE activo = TRUE")
         stats['usuarios_activos'] = cur.fetchone()[0]
 

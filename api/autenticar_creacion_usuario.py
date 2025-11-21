@@ -46,7 +46,7 @@ async def login(request: Request):
         raise HTTPException(status_code=400, detail="Could not read request body")
     
     try:
-        from urllib.parse import parse_qs # Función para parsear strings
+        from urllib.parse import parse_qs 
         body_str = body.decode('utf-8')
         form_data = parse_qs(body_str)
         logger.info(f"🔍 DIAGNOSTIC - Parsed form data: {form_data}")

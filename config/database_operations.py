@@ -1,6 +1,3 @@
-# ==========================================
-# config/database_operations.py - Operaciones CRUD de base de datos
-# ==========================================
 from psycopg2 import Error
 from .logging_config import logger
 
@@ -39,7 +36,7 @@ def insert_data(cursor, connection, table, data, columns=None):
 
         logger.debug(f'Ejecutando inserción en tabla "{table}": {query}')
         cursor.execute(query, data)
-        new_id = cursor.fetchone()[0]  # Obtener el ID antes del commit
+        new_id = cursor.fetchone()[0] 
         connection.commit()
 
         logger.info(f"✅ Datos insertados correctamente en tabla '{table}' con ID: {new_id}")
@@ -95,11 +92,9 @@ def insert_usuario(user_data):
         if 'connection' in locals() and connection:
             connection.rollback()
 
-        # Check for specific error types
         error_str = str(error)
         if 'UniqueViolation' in str(type(error)) or ('psycopg2' in str(type(error)) and 'IntegrityError' in error_str):
             logger.error("DEBUG: Unique constraint violation detected")
-            # Check for specific field violations in order of priority
             if 'email' in error_str.lower():
                 return {"error": "El email ya está registrado", "type": "duplicate_email"}
             elif 'dni' in error_str.lower():
@@ -124,14 +119,12 @@ def insert_reserva(cursor, connection, usuario_id, fecha_check_in, fecha_check_o
     Inserta una nueva reserva - VERSIÓN CORREGIDA
     """
     try:
-        # DEBUG: Check if 'observaciones' column exists in reservas table
         cursor.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'reservas' AND column_name = 'observaciones'")
         observaciones_exists = cursor.fetchone()[0] > 0
 
         logger.debug(f"📋 Verificación de columna 'observaciones' en tabla 'reservas': {'EXISTS' if observaciones_exists else 'NOT EXISTS'}")
 
         if observaciones_exists:
-            # ✅ Inserción directa con RETURNING - MÁS SEGURA
             cursor.execute("""
                 INSERT INTO reservas (usuario_id, fecha_check_in, fecha_check_out,
                                     cantidad_habitaciones, precio_total, observaciones)
@@ -141,7 +134,6 @@ def insert_reserva(cursor, connection, usuario_id, fecha_check_in, fecha_check_o
                   precio_total, observaciones))
             logger.debug("✅ INSERT con columna 'observaciones' ejecutado")
         else:
-            # Fallback: INSERT without observaciones column
             cursor.execute("""
                 INSERT INTO reservas (usuario_id, fecha_check_in, fecha_check_out,
                                     cantidad_habitaciones, precio_total)
@@ -151,7 +143,7 @@ def insert_reserva(cursor, connection, usuario_id, fecha_check_in, fecha_check_o
                   precio_total))
             logger.warning("⚠️ INSERT sin columna 'observaciones' - columna no existe en tabla")
 
-        reserva_id = cursor.fetchone()[0]  # ✅ ID correcto garantizado
+        reserva_id = cursor.fetchone()[0]  
         connection.commit()
 
         logger.info(f"✅ Reserva creada con ID: {reserva_id}")
@@ -186,11 +178,9 @@ def authenticate_user(email, password):
             logger.error("No se pudo conectar a la base de datos")
             return None
         
-        # DIAGNOSTIC: Log what we're searching for
         logger.info(f"🔍 DIAGNOSTIC - authenticate_user called with email: {email}")
         logger.info(f"🔍 DIAGNOSTIC - Password length: {len(password)} chars, bytes: {len(password.encode('utf-8'))}")
 
-        # First, get the user by email only (case-insensitive)
         cursor.execute("""
             SELECT id, nombre, apellido, email, activo, password
             FROM usuarios
@@ -206,7 +196,6 @@ def authenticate_user(email, password):
         logger.info(f"✅ DIAGNOSTIC - User found: {nombre} {apellido} (ID: {user_id}), DB email: {email_db}")
         logger.info(f"🔍 DIAGNOSTIC - Stored hash length: {len(hashed_password)} chars, starts with: {hashed_password[:20]}...")
 
-        # Now verify the password using bcrypt
         try:
             password_bytes = password.encode('utf-8')
             hashed_password_bytes = hashed_password.encode('utf-8')
@@ -225,7 +214,6 @@ def authenticate_user(email, password):
             logger.error(f"❌ DIAGNOSTIC - Error during password verification: {e}")
             return None
         
-        # Password verified successfully
         user_data = {
             'id': user_id,
             'nombre': nombre,

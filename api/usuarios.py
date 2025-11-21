@@ -17,14 +17,13 @@ else:
     logger.info("Configuración de la base de datos válida")
 
 
-# Pydantic models
 class UserListResponse(BaseModel):
     id: int
     nombre: str
     apellido: str
     email: str
 
-    class Config: # para uso de un ORM
+    class Config:
         from_attributes = True
 
 class UserUpdateRequest(BaseModel):
@@ -60,12 +59,10 @@ async def get_usuarios():
 async def delete_usuario(user_id: int):
     logger.info(f"DELETE request received for user_id: {user_id}")
     try:
-        # Verificar que el usuario existe y está activo
         logger.info("Connecting to database...")
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor(cursor_factory=RealDictCursor)
 
-        # Primero verificar si el usuario existe
         logger.info(f"Checking if user {user_id} exists and is active...")
         cursor.execute("SELECT id, nombre, apellido FROM usuarios WHERE id = %s AND activo = true", (user_id,))
         user = cursor.fetchone()
@@ -77,7 +74,6 @@ async def delete_usuario(user_id: int):
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
 
-        # Verificar si el usuario tiene reservas activas
         logger.info(f"Revisando reservas activas para el usuario con ID: {user_id}...")
         query = """
             SELECT COUNT(*) FROM reservas
@@ -100,7 +96,6 @@ async def delete_usuario(user_id: int):
             logger.warning(f"No se puede eliminar al usuario: {user_id} - tiene {active_reservations} reservas activas")
             raise HTTPException(status_code=400, detail="No se puede eliminar un usuario con reservas activas")
 
-        # Marcar usuario como inactivo (soft delete)
         logger.info(f"Usuario inactivo {user_id}...")
         cursor.execute("UPDATE usuarios SET activo = false WHERE id = %s", (user_id,))
         connection.commit()
@@ -126,7 +121,6 @@ async def update_usuario(user_id: int, user_data: UserUpdateRequest):
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor(cursor_factory=RealDictCursor)
 
-        # Verificar que el usuario existe y está activo
         cursor.execute("SELECT id FROM usuarios WHERE id = %s AND activo = true", (user_id,))
         user = cursor.fetchone()
         if not user:
@@ -135,7 +129,6 @@ async def update_usuario(user_id: int, user_data: UserUpdateRequest):
             logger.warning(f"User {user_id} not found or not active")
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-        # Verificar que el email no esté siendo usado por otro usuario activo
         cursor.execute("SELECT id FROM usuarios WHERE email = %s AND activo = true AND id != %s", (user_data.email, user_id))
         existing_user = cursor.fetchone()
         if existing_user:
@@ -144,7 +137,6 @@ async def update_usuario(user_id: int, user_data: UserUpdateRequest):
             logger.warning(f"Email {user_data.email} already in use by another active user")
             raise HTTPException(status_code=400, detail="El email ya está en uso por otro usuario")
 
-        # Actualizar el usuario
         cursor.execute("""
             UPDATE usuarios
             SET nombre = %s, apellido = %s, email = %s

@@ -6,7 +6,6 @@ class RoomBase(BaseModel):
     numero: int = Field(..., ge=1, le=4)
     descripcion: Optional[str] = None
     disponible: bool = True
-    # fecha creación: se añade automaticamente
     
 class RoomCreate(RoomBase):
     pass

@@ -1,6 +1,3 @@
-# ==========================================
-# config/database_initialization.py - Inicialización del esquema de base de datos
-# ==========================================
 from psycopg2 import Error
 from .logging_config import logger
 
@@ -11,7 +8,6 @@ def create_default_rooms(cursor, connection):
     try:
         logger.info('🏠 Inicializando habitaciones por defecto...')
 
-        # Verificar si ya existen habitaciones
         cursor.execute('SELECT COUNT(*) FROM habitaciones')
         existing_rooms = cursor.fetchone()[0]
 
@@ -139,11 +135,9 @@ def create_posada_tables(cursor, connection):
         connection.commit()
         logger.info(f"✅ Todas las tablas del sistema creadas/verificadas exitosamente ({created_tables} tablas)")
 
-        # Crear las 4 habitaciones si no existen
         if create_default_rooms(cursor, connection):
             logger.info('✅ Habitaciones por defecto inicializadas')
 
-        # Asegurar que la columna password existe en usuarios
         try:
             cursor.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS password VARCHAR(255) NOT NULL DEFAULT 'temp_password'")
             connection.commit()
@@ -153,7 +147,6 @@ def create_posada_tables(cursor, connection):
             connection.rollback()
             return False
 
-        # Asegurar que la columna cuil_cuit existe en usuarios
         try:
             cursor.execute("ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS cuil_cuit VARCHAR(13)")
             connection.commit()
@@ -163,7 +156,6 @@ def create_posada_tables(cursor, connection):
             connection.rollback()
             return False
 
-        # Asegurar que la restricción UNIQUE existe para cuil_cuit
         try:
             cursor.execute("""
                 DO $$
@@ -184,7 +176,6 @@ def create_posada_tables(cursor, connection):
             connection.rollback()
             return False
 
-        # Asegurar que la restricción UNIQUE existe para telefono
         try:
             cursor.execute("""
                 DO $$
@@ -219,12 +210,10 @@ def create_default_price(cursor, connection, precio_inicial=50000.00):
     try:
         logger.info("💰 Verificando precios por defecto...")
 
-        # DEBUG: Registrar la estructura actual de la tabla de precios
         cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'precios' ORDER BY ordinal_position")
         columns = cursor.fetchall()
         logger.debug(f"📋 Columnas actuales en tabla 'precios': {[col[0] for col in columns]}")
 
-        # Revisar si la columna "activo" existe antes de hacer la consulta
         cursor.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'precios' AND column_name = 'activo'")
         activo_exists = cursor.fetchone()[0] > 0
 
@@ -238,7 +227,6 @@ def create_default_price(cursor, connection, precio_inicial=50000.00):
             logger.warning("⚠️ Columna 'activo' NO existe en tabla 'precios', consultando total de registros")
 
         if active_prices == 0:
-            # Revisar si exiten las columnas necesarias antes de hacer un insert
             cursor.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'precios' AND column_name IN ('fecha_vigencia_desde', 'descripcion')")
             required_columns_exist = cursor.fetchone()[0] == 2
 
@@ -276,12 +264,10 @@ def initialize_posada_system(cursor, connection):
     logger.info("🚀 Inicializando sistema completo de la posada...")
 
     try:
-        # Paso 1: Crear todas las tablas
         if not create_posada_tables(cursor, connection):
             logger.error("❌ Falló la creación de tablas")
             return False
 
-        # Paso 2: Crear precio por defecto
         if not create_default_price(cursor, connection):
             logger.error("❌ Falló la creación del precio por defecto")
             return False

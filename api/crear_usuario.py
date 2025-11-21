@@ -29,7 +29,6 @@ async def crear_usuario(request: UserCreateRequest):
 
         logger.info(f'Password received: {repr(password)}, len chars: {len(password)}, len bytes: {len(password.encode("utf-8"))}')
 
-        # Validate plain password with UserCreate before hashing
         try:
             user_data = UserCreate(
                 nombre=request.nombre,
@@ -43,7 +42,6 @@ async def crear_usuario(request: UserCreateRequest):
             logger.info("DEBUG: UserCreate validation passed with plain password")
         except ValidationError as e:
             logger.error(f"DEBUG: UserCreate validation failed: {type(e).__name__}: {str(e)}")
-            # Check if the error is related to email validation
             errors = e.errors()
             for error in errors:
                 if 'email' in error.get('loc', []):
@@ -51,10 +49,9 @@ async def crear_usuario(request: UserCreateRequest):
                         status_code=400,
                         detail="El formato de email es inválido"
                     )
-            # For other validation errors, use the original logic
             error_msg = errors[0]['msg'] if errors else str(e)
             if error_msg.startswith("Value error, "):
-                error_msg = error_msg[13:]  # Remove "Value error, " prefix
+                error_msg = error_msg[13:] 
             raise HTTPException(
                 status_code=400,
                 detail=error_msg
@@ -90,7 +87,6 @@ async def crear_usuario(request: UserCreateRequest):
 
         logger.info(f'Usuario creado exitosamente con ID {user_id}')
         
-        # Log para debugging - construir respuesta paso a paso
         user_response = None
         try:
             logger.info(f'Construyendo UserResponse con id={user_id}')
