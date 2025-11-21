@@ -91,7 +91,7 @@ a:hover {
   margin-left:12px;
   padding:8px 12px;
   border-radius:10px;
-  background:transparent;
+  background: #596546c4 !important;
   border:1px solid rgba(0,0,0,0.06);
 }
 
@@ -125,7 +125,6 @@ a:hover {
   transform: translateY(0) scale(1.05);
 }
 
-
 .full-screen-container-nav {
     display: flex;
     gap: 18px;
@@ -157,7 +156,7 @@ a:hover {
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:22px 0;
+  padding:12px 0;
   width:100%;
   position:absolute;
   bottom:0;

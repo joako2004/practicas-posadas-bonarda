@@ -1,3 +1,8 @@
+:root {
+    --beige: #bfae8f;
+    --beige-opaque: rgba(191, 174, 143, 0.88);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -9,60 +14,67 @@ body {
     background-color: #F0F0F0;
     min-height: 100vh;
 }
-
-.browser-mockup {
-    max-width: 1200px;
-    margin: 20px auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(51, 51, 51, 0.1);
-    overflow: hidden;
+input, button, select, textarea {
+    font-family: inherit;
 }
 
-.browser-header {
-    background: #938C74;
-    height: 40px;
+.nav-pill {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 18px;
+    background-color: var(--beige);
+    border: 1px solid rgba(0,0,0,0.1);
+    padding: 17px 43px;
+    border-radius: 34px;
     display: flex;
-    align-items: center;
-    padding: 0 15px;
-    gap: 15px;
-}
-
-.browser-controls {
-    display: flex;
-    gap: 8px;
-}
-
-.control {
-    width: 20px;
-    height: 20px;
-    background: rgba(240, 240, 240, 0.3);
-    border-radius: 50%;
-    display: flex;
+    gap: 20px;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    color: #F0F0F0;
-    cursor: pointer;
+    width: auto;
+    min-width: 840px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    z-index: 10;
 }
 
-.address-bar {
-    background: rgba(220, 214, 202, 0.9);
-    flex: 1;
-    height: 28px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    padding: 0 12px;
-    font-size: 14px;
-    color: #333333;
+.brand {
+    font-weight:700;
+    letter-spacing:1px;
+    padding-right:14px;
+    border-right:1px solid rgba(0,0,0,0.06);
+    color: black;
 }
 
-.browser-menu {
-    width: 60px;
-    height: 8px;
-    background: rgba(240, 240, 240, 0.4);
-    border-radius: 4px;
+a {
+  text-decoration: none;  
+  color: inherit;
+  transition: transform 0.2s ease-in-out;
+}
+
+a:hover {
+  transform: scale(1.1);
+}
+
+.nav-pill a{
+  color:#000000;
+  text-decoration:none;
+  font-size:15px
+}
+
+.nav-pill a.cta{
+  margin-left:12px;
+  padding:8px 12px;
+  border-radius:10px;
+  background: #596546c4 !important;
+  border:1px solid rgba(0,0,0,0.06);
+}
+
+.nav-pill nav {
+  display: flex;
+  justify-content: space-between;
+  flex: 1; 
+  gap: 12px; 
+  align-items: center;
 }
 
 .page-content {
@@ -75,6 +87,7 @@ body {
 }
 
 .form-container {
+    margin-top: 60px;
     width: 100%;
     max-width: 500px;
 }
@@ -82,7 +95,7 @@ body {
 .form-card {
     background: #F0F0F0;
     border-radius: 20px;
-    padding: 40px;
+    padding: 30px;
     box-shadow: 0 10px 30px rgba(51, 51, 51, 0.15);
     border: 1px solid rgba(147, 140, 116, 0.1);
 }
@@ -100,13 +113,13 @@ h1 {
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 12px;
 }
 
 .field-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 5px;
 }
 
 .name-group {
@@ -212,11 +225,7 @@ input::placeholder {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .browser-mockup {
-        margin: 10px;
-        border-radius: 0;
-    }
-    
+   
     .form-card {
         padding: 30px 25px;
     }
@@ -234,13 +243,5 @@ input::placeholder {
 @media (max-width: 480px) {
     .form-card {
         padding: 25px 20px;
-    }
-    
-    .browser-header {
-        padding: 0 10px;
-    }
-    
-    .address-bar {
-        font-size: 12px;
     }
 }

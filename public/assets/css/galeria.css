@@ -24,7 +24,7 @@ body {
 }
 
 /* Barra de navegación estilo "pill" transparente */
-.nav-pill {
+/*.nav-pill {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -41,6 +41,25 @@ body {
   box-shadow: 0 6px 18px rgba(0,0,0,0.12);
   backdrop-filter: blur(3px);
   z-index: 2;
+}
+  */
+.nav-pill {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 18px;
+  background-color: var(--beige);
+  border: 1px solid rgba(0,0,0,0.1);
+  padding: 17px 43px;
+  border-radius: 34px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 840px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  z-index: 10;
 }
 
 .brand {
