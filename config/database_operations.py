@@ -205,8 +205,8 @@ def get_user_by_id(user_id):
         if 'connection' in locals() and 'cursor' in locals():
             close_connection(connection, cursor)
     
-def authenticate_user(email, password):
-    """Autentica un usuario por email y contraseña"""
+def authenticate_user(identifier, password):
+    """Autentica un usuario por email o DNI y contraseña"""
     try:
         from .database_connection import connect_postgresql, close_connection
         import bcrypt
@@ -216,50 +216,43 @@ def authenticate_user(email, password):
             logger.error("No se pudo conectar a la base de datos")
             return None
         
-        logger.info(f"🔍 DIAGNOSTIC - authenticate_user called with email: {email}")
-        logger.info(f"🔍 DIAGNOSTIC - Password length: {len(password)} chars, bytes: {len(password.encode('utf-8'))}")
-
+        # Buscar por email o DNI
         cursor.execute("""
-            SELECT id, nombre, apellido, email, activo, password
+            SELECT id, nombre, apellido, dni, email, activo, password
             FROM usuarios
-            WHERE LOWER(email) = LOWER(%s) AND activo = true
-        """, (email,))
+            WHERE (LOWER(email) = LOWER(%s) OR dni = %s) AND activo = true
+        """, (identifier, identifier))
 
         user = cursor.fetchone()
         if not user:
-            logger.warning(f"❌ DIAGNOSTIC - No user found with email: {email} (searched case-insensitively)")
+            logger.warning(f"Intento de login fallido: Usuario {identifier} no encontrado")
             return None
 
-        user_id, nombre, apellido, email_db, activo, hashed_password = user
-        logger.info(f"✅ DIAGNOSTIC - User found: {nombre} {apellido} (ID: {user_id}), DB email: {email_db}")
-        logger.info(f"🔍 DIAGNOSTIC - Stored hash length: {len(hashed_password)} chars, starts with: {hashed_password[:20]}...")
+        user_id, nombre, apellido, dni, email_db, activo, hashed_password = user
 
         try:
             password_bytes = password.encode('utf-8')
             hashed_password_bytes = hashed_password.encode('utf-8')
 
-            logger.info(f"🔍 DIAGNOSTIC - Password bytes length: {len(password_bytes)}, hash bytes length: {len(hashed_password_bytes)}")
-            logger.info(f"🔍 DIAGNOSTIC - Comparing lengths for truncation debug: input password {len(password_bytes)} bytes vs stored hash {len(hashed_password_bytes)} bytes")
-
             password_match = bcrypt.checkpw(password_bytes, hashed_password_bytes)
-            logger.info(f"🔍 DIAGNOSTIC - Password match result: {password_match}")
 
             if not password_match:
-                logger.warning(f"❌ DIAGNOSTIC - Password verification failed for email: {email}")
+                logger.warning(f"Intento de login fallido: contraseña incorrecta para {identifier}")
                 return None
 
         except Exception as e:
-            logger.error(f"❌ DIAGNOSTIC - Error during password verification: {e}")
+            logger.error(f"Error verificando contraseña: {e}")
             return None
         
         user_data = {
             'id': user_id,
             'nombre': nombre,
             'apellido': apellido,
+            'dni': dni,
             'email': email_db,
             'activo': activo
         }
-        logger.info(f"✅ DIAGNOSTIC - User authenticated successfully: {email}")
+        logger.info(f"Usuario autenticado exitosamente: {identifier}")
         return user_data
             
     except Exception as error:
