@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
     console.log('DEBUG: DOMContentLoaded fired');
     const token = localStorage.getItem('token');
     console.log('DEBUG: Token from localStorage:', token ? token.substring(0, 10) + '...' : 'null');
@@ -6,24 +6,38 @@ document.addEventListener('DOMContentLoaded', async function() {
     const noReservasMsg = document.getElementById('no-reservas');
     const reservaForm = document.getElementById('reserva-form');
     const crearReservaSection = document.querySelector('section:nth-of-type(2)');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    // Logout functionality
+    if (logoutBtn) {
+        console.log('DEBUG: Logout button found and listener attached');
+        logoutBtn.addEventListener('click', function () {
+            console.log('DEBUG: Logout initiated');
+            localStorage.removeItem('token');
+            alert('Has cerrado sesión exitosamente.');
+            window.location.href = '/login';
+        });
+    } else {
+        console.error('DEBUG: Logout button NOT found');
+    }
 
     // Validate token
-     async function validateToken() {
-         try {
-             const response = await fetch('/api/reservas', {
-                 method: 'GET',
-                 headers: {
-                     'Authorization': `Bearer ${token}`,
-                     'Content-Type': 'application/json'
-                 }
-             });
-             console.log('DEBUG: Token validation response status:', response.status);
-             return response.ok;
-         } catch (err) {
-             console.error('DEBUG: Token validation failed:', err);
-             return false;
-         }
-     }
+    async function validateToken() {
+        try {
+            const response = await fetch('/api/reservas', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            console.log('DEBUG: Token validation response status:', response.status);
+            return response.ok;
+        } catch (err) {
+            console.error('DEBUG: Token validation failed:', err);
+            return false;
+        }
+    }
 
     if (!token || !(await validateToken())) {
         console.log('DEBUG: No token or invalid token, showing login message');
@@ -82,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     if (reservaForm) {
-        reservaForm.addEventListener('submit', async function(e) {
+        reservaForm.addEventListener('submit', async function (e) {
             e.preventDefault();
             console.log('DEBUG: Form submission triggered');
 
