@@ -64,8 +64,8 @@ def insert_usuario(user_data):
             return {"error": "Database connection failed", "type": "connection_error"}
 
         cursor.execute("""
-            INSERT INTO usuarios (nombre, apellido, dni, cuil_cuit, email, telefono, password)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO usuarios (nombre, apellido, dni, cuil_cuit, email, telefono, password, activo)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING id
         """, (
             user_data.nombre,
@@ -74,7 +74,8 @@ def insert_usuario(user_data):
             user_data.cuil_cuit,
             user_data.email,
             user_data.telefono,
-            user_data.password
+            user_data.password,
+            True
         ))
 
         result = cursor.fetchone()
@@ -166,7 +167,44 @@ def insert_pago(cursor, connection, reserva_id, tipo_pago, monto, metodo_pago, c
 
     except Exception as error:
         logger.error(f"❌ Error insertando pago: {error}")
-        return False
+
+def get_user_by_id(user_id):
+    """Obtiene un usuario por ID"""
+    try:
+        from .database_connection import connect_postgresql, close_connection
+        
+        connection, cursor = connect_postgresql()
+        if not connection or not cursor:
+            logger.error("No se pudo conectar a la base de datos")
+            return None
+        
+        cursor.execute("""
+            SELECT id, nombre, apellido, email, activo
+            FROM usuarios
+            WHERE id = %s AND activo = true
+        """, (user_id,))
+        
+        user = cursor.fetchone()
+        if not user:
+            return None
+        
+        user_id, nombre, apellido, email, activo = user
+        user_data = {
+            'id': user_id,
+            'nombre': nombre,
+            'apellido': apellido,
+            'email': email,
+            'activo': activo
+        }
+        return user_data
+            
+    except Exception as error:
+        logger.error(f"Error obteniendo usuario por ID: {error}")
+        return None
+    finally:
+        if 'connection' in locals() and 'cursor' in locals():
+            close_connection(connection, cursor)
+    
 def authenticate_user(email, password):
     """Autentica un usuario por email y contraseña"""
     try:

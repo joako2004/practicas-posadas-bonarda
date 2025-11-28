@@ -1,6 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jwt import decode as jwt_decode, PyJWTError
 from datetime import datetime, timedelta, date
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -8,6 +6,7 @@ from config.logging_config import logger
 from models.booking import BookingCreate, BookingResponse
 from config.database_operations import execute_query, insert_reserva
 from config.database_config import get_database_config, validate_database_config
+from api.auth import get_current_active_user
 from dotenv import load_dotenv
 import os
 # from twilio.rest import Client  # Descomentar si usas Twilio
@@ -16,9 +15,6 @@ load_dotenv()
 
 router = APIRouter()
 
-SECRET_KEY = os.getenv('JWT_SECRET', 'xPS9pT9NLXy42Q_DSHL-oYuA8WmEZoW13Kf6GvvMUW0')
-ALGORITHM = 'HS256'
-logger.debug(f"JWT_SECRET used for decoding: '{SECRET_KEY}' (length: {len(SECRET_KEY)})")
 DB_CONFIG = get_database_config()
 
 logger.debug(f"DB_CONFIG loaded: host={DB_CONFIG['host']}, database={DB_CONFIG['database']}, user={DB_CONFIG['user']}, port={DB_CONFIG['port']}")
@@ -32,38 +28,17 @@ if not is_valid:
 else:
     logger.info("Configuración de la base de datos válida")
 
-# Twilio 
+# Twilio
 # TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "tu_twilio_account_sid")
 # TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "tu_twilio_auth_token")
 # TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER", "whatsapp:+14155238886")
 # ADMIN_WHATSAPP_NUMBER = os.getenv("ADMIN_WHATSAPP_NUMBER", "whatsapp:+numero_admin")
 # twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
-security = HTTPBearer()
-
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    try:
-        token = credentials.credentials
-        logger.debug(f"Token recibido (primeros 50 chars): {token[:50]}...")
-        payload = jwt_decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str | None = payload.get('sub')
-        exp = payload.get('exp')
-        current_time = datetime.utcnow().timestamp()
-        logger.debug(f"Token payload: sub={user_id}, exp={exp}, current_time={current_time}")
-        if user_id is None:
-            logger.error("Token inválido: sub no encontrado")
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token Inválido')
-        logger.debug(f"Usuario autenticado: ID {user_id}")
-        return {'id': int(user_id)}
-    except PyJWTError as e:
-        logger.error(f"Error decodificando token: {str(e)}")
-        logger.error(f"Token that failed: {token[:100]}...")
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token Inválido')
-
 @router.get("/reservas", response_model=list[BookingResponse])
-async def get_reservas(current_user: dict = Depends(get_current_user)):
+async def get_reservas(current_user = Depends(get_current_active_user)):
     try:
-        user_id = current_user["id"]
+        user_id = current_user.id
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor(cursor_factory=RealDictCursor)
         query = """
@@ -85,8 +60,8 @@ async def get_reservas(current_user: dict = Depends(get_current_user)):
 
 # POST /api/reservas - Crear una nueva reserva
 @router.post("/reservas", response_model=BookingResponse)
-async def create_reserva(reserva: BookingCreate, current_user: dict = Depends(get_current_user)):
-    user_id = current_user["id"]
+async def create_reserva(reserva: BookingCreate, current_user = Depends(get_current_active_user)):
+    user_id = current_user.id
     
     try:
         if reserva.cantidad_habitaciones < 1 or reserva.cantidad_habitaciones > 4:

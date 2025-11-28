@@ -5,11 +5,8 @@ from pydantic import BaseModel, EmailStr, ValidationError
 from datetime import datetime, timedelta, timezone
 from config.logging_config import logger
 import bcrypt
-import jwt
+from api.auth import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 import os
-
-SECRET_KEY = os.getenv('JWT_SECRET', 'xPS9pT9NLXy42Q_DSHL-oYuA8WmEZoW13Kf6GvvMUW0')
-ALGORITHM = 'HS256'
 
 class UserCreateRequest(BaseModel):
     nombre: str
@@ -80,9 +77,8 @@ async def crear_usuario(request: UserCreateRequest):
 
         logger.info(f"🔍 DEBUG - User created with ID {user_id}, DB_HOST={os.getenv('DB_HOST', 'localhost')}, DB_NAME={os.getenv('DB_NAME', 'posada_db')}")
 
-        logger.debug(f"JWT_SECRET used for encoding in crear_usuario: '{SECRET_KEY}' (length: {len(SECRET_KEY)})")
-        token_data = {"sub": str(user_id), "exp": datetime.now(timezone.utc) + timedelta(days=30)}
-        token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        token = create_access_token(data={"sub": str(user_id)}, expires_delta=access_token_expires)
         logger.debug(f"Generated token in crear_usuario (first 50 chars): {token[:50]}...")
 
         logger.info(f'Usuario creado exitosamente con ID {user_id}')

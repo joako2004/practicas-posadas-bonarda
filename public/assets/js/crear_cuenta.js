@@ -85,34 +85,10 @@ document.querySelector('.registration-form').addEventListener('submit', async fu
             return;
         }
 
-        // Iniciar sesión automáticamente
-        console.log('DEBUG: Attempting login with URL /autenticar_creacion_usuario/login');
-        console.log('DEBUG: Login request data:', {username: data.email, password: data.password || ""});
-        
-        const formData = new URLSearchParams();
-        formData.append('username', data.email);
-        formData.append('password', data.password || "");
-        
-        const loginResponse = await fetch('/autenticar_creacion_usuario/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: formData.toString()
-        });
-        console.log('DEBUG: Login response status:', loginResponse.status);
-
-        if (!loginResponse.ok) {
-            const errorData = await loginResponse.json();
-            console.log('DEBUG: Login error response:', errorData);
-            alert('Error al iniciar sesión: ' + (errorData.detail || 'Intenta de nuevo'));
-            return;
-        }
-
-        const loginData = await loginResponse.json();
-        console.log('DEBUG: Login successful, received data:', loginData);
-        localStorage.setItem('token', loginData.access_token);
-        console.log('DEBUG: Token stored:', loginData.access_token.substring(0, 10) + '...');
+        const responseData = await response.json();
+        console.log('DEBUG: Registration successful, received data:', responseData);
+        localStorage.setItem('token', responseData.token);
+        console.log('DEBUG: Token stored:', responseData.token.substring(0, 10) + '...');
         alert('Usuario creado exitosamente!');
         window.location.href = '/crear_reserva';
     } catch (error) {
