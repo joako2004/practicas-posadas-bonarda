@@ -7,18 +7,39 @@ document.addEventListener('DOMContentLoaded', async function () {
     const reservaForm = document.getElementById('reserva-form');
     const crearReservaSection = document.querySelector('section:nth-of-type(2)');
     const logoutBtn = document.getElementById('logout-btn');
-    const today = new Date().toISOString().split('T')[0];
     const fechaCheckIn = document.querySelector('[name="fecha_check_in"]');
     const fechaCheckOut = document.querySelector('[name="fecha_check_out"]');
-     
-    document.querySelector('[name="fecha_check_in"]').min = today;
 
-    fechaCheckIn.addEventListener('change', () => {
-        const minSalida = new Date(fechaCheckIn.value);
-        minSalida.setDate(minSalida.getDate() + 2);
-        fechaCheckOut.min = minSalida.toISOString().split('T')[0];
+    // Initialize Flatpickr for Check-Out first to reference it in Check-In
+    const fpCheckOut = flatpickr(fechaCheckOut, {
+        locale: "es",
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        minDate: new Date().fp_incr(2) // Initial min date: today + 2 days
     });
-    
+
+    // Initialize Flatpickr for Check-In
+    flatpickr(fechaCheckIn, {
+        locale: "es",
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        minDate: "today",
+        onChange: function (selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                const minSalida = new Date(selectedDates[0]);
+                minSalida.setDate(minSalida.getDate() + 2);
+                fpCheckOut.set('minDate', minSalida);
+
+                // If current checkout date is invalid, clear it
+                if (fpCheckOut.selectedDates.length > 0 && fpCheckOut.selectedDates[0] < minSalida) {
+                    fpCheckOut.clear();
+                }
+            }
+        }
+    });
+
     // Logout functionality
     if (logoutBtn) {
         console.log('DEBUG: Logout button found and listener attached');
