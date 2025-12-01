@@ -10,16 +10,14 @@ document.addEventListener('DOMContentLoaded', async function () {
     const fechaCheckIn = document.querySelector('[name="fecha_check_in"]');
     const fechaCheckOut = document.querySelector('[name="fecha_check_out"]');
 
-    // Initialize Flatpickr for Check-Out first to reference it in Check-In
     const fpCheckOut = flatpickr(fechaCheckOut, {
         locale: "es",
         dateFormat: "Y-m-d",
         altInput: true,
         altFormat: "d/m/Y",
-        minDate: new Date().fp_incr(2) // Initial min date: today + 2 days
+        minDate: new Date().fp_incr(2)
     });
 
-    // Initialize Flatpickr for Check-In
     flatpickr(fechaCheckIn, {
         locale: "es",
         dateFormat: "Y-m-d",
@@ -40,7 +38,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     });
 
-    // Logout functionality
     if (logoutBtn) {
         console.log('DEBUG: Logout button found and listener attached');
         logoutBtn.addEventListener('click', function () {
@@ -53,7 +50,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         console.error('DEBUG: Logout button NOT found');
     }
 
-    // Validate token
     async function validateToken() {
         try {
             const response = await fetch('/api/reservas', {
@@ -116,7 +112,18 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             reservas.forEach(reserva => {
                 const li = document.createElement('li');
-                li.textContent = `ID: ${reserva.id}, Fechas: ${reserva.fecha_check_in} a ${reserva.fecha_check_out}, Habitaciones: ${reserva.cantidad_habitaciones}, Estado: ${reserva.estado}, Precio: $${reserva.precio_total}`;
+
+                // Helper to format YYYY-MM-DD to DD/MM/YYYY
+                const formatDate = (dateString) => {
+                    if (!dateString) return '';
+                    const parts = dateString.split('-');
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                };
+
+                const fechaIn = formatDate(reserva.fecha_check_in);
+                const fechaOut = formatDate(reserva.fecha_check_out);
+
+                li.textContent = `Tienes una reserva desde la fecha ${fechaIn} hasta la fecha ${fechaOut}`;
                 reservasList.appendChild(li);
             });
         }
