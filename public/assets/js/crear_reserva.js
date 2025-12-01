@@ -7,7 +7,18 @@ document.addEventListener('DOMContentLoaded', async function () {
     const reservaForm = document.getElementById('reserva-form');
     const crearReservaSection = document.querySelector('section:nth-of-type(2)');
     const logoutBtn = document.getElementById('logout-btn');
+    const today = new Date().toISOString().split('T')[0];
+    const fechaCheckIn = document.querySelector('[name="fecha_check_in"]');
+    const fechaCheckOut = document.querySelector('[name="fecha_check_out"]');
+     
+    document.querySelector('[name="fecha_check_in"]').min = today;
 
+    fechaCheckIn.addEventListener('change', () => {
+        const minSalida = new Date(fechaCheckIn.value);
+        minSalida.setDate(minSalida.getDate() + 2);
+        fechaCheckOut.min = minSalida.toISOString().split('T')[0];
+    });
+    
     // Logout functionality
     if (logoutBtn) {
         console.log('DEBUG: Logout button found and listener attached');
