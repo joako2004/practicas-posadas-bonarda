@@ -36,7 +36,13 @@ def insert_data(cursor, connection, table, data, columns=None):
 
         logger.debug(f'Ejecutando inserción en tabla "{table}": {query}')
         cursor.execute(query, data)
-        new_id = cursor.fetchone()[0] 
+        
+        result = cursor.fetchone()
+        if isinstance(result, dict):
+            new_id = result['id']
+        else:
+            new_id = result[0]
+            
         connection.commit()
 
         logger.info(f"✅ Datos insertados correctamente en tabla '{table}' con ID: {new_id}")
@@ -121,7 +127,13 @@ def insert_reserva(cursor, connection, usuario_id, fecha_check_in, fecha_check_o
     """
     try:
         cursor.execute("SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'reservas' AND column_name = 'observaciones'")
-        observaciones_exists = cursor.fetchone()[0] > 0
+        result = cursor.fetchone()
+        
+        # Handle both RealDictCursor (dict) and standard cursor (tuple)
+        if isinstance(result, dict):
+            observaciones_exists = result['count'] > 0
+        else:
+            observaciones_exists = result[0] > 0
 
         logger.debug(f"📋 Verificación de columna 'observaciones' en tabla 'reservas': {'EXISTS' if observaciones_exists else 'NOT EXISTS'}")
 
@@ -144,7 +156,12 @@ def insert_reserva(cursor, connection, usuario_id, fecha_check_in, fecha_check_o
                   precio_total))
             logger.warning("⚠️ INSERT sin columna 'observaciones' - columna no existe en tabla")
 
-        reserva_id = cursor.fetchone()[0]  
+        reserva_id_row = cursor.fetchone()
+        if isinstance(reserva_id_row, dict):
+            reserva_id = reserva_id_row['id']
+        else:
+            reserva_id = reserva_id_row[0]
+            
         connection.commit()
 
         logger.info(f"✅ Reserva creada con ID: {reserva_id}")

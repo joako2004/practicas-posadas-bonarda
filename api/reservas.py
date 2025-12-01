@@ -42,9 +42,9 @@ async def get_reservas(current_user = Depends(get_current_active_user)):
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor(cursor_factory=RealDictCursor)
         query = """
-            SELECT r.id, r.fecha_check_in AS fecha_entrada, r.fecha_check_out AS fecha_salida,
-                    r.cantidad_habitaciones AS huespedes, u.email AS contacto,
-                    r.estado, r.precio_total, r.fecha_creacion
+            SELECT r.id, r.usuario_id, r.fecha_check_in, r.fecha_check_out,
+                    r.cantidad_habitaciones, u.email AS contacto,
+                    INITCAP(r.estado) as estado, r.precio_total, r.fecha_creacion
             FROM reservas r
             JOIN usuarios u ON r.usuario_id = u.id
             WHERE r.usuario_id = %s
@@ -122,9 +122,9 @@ async def create_reserva(reserva: BookingCreate, current_user = Depends(get_curr
 
         cursor.execute(
             """
-            SELECT r.id, r.fecha_check_in AS fecha_entrada, r.fecha_check_out AS fecha_salida,
-                    r.cantidad_habitaciones AS huespedes, u.email AS contacto,
-                    r.estado, r.precio_total, r.fecha_creacion
+            SELECT r.id, r.usuario_id, r.fecha_check_in, r.fecha_check_out,
+                    r.cantidad_habitaciones, u.email AS contacto,
+                    INITCAP(r.estado) as estado, r.precio_total, r.fecha_creacion
             FROM reservas r
             JOIN usuarios u ON r.usuario_id = u.id
             WHERE r.id = %s
@@ -148,7 +148,8 @@ async def create_reserva(reserva: BookingCreate, current_user = Depends(get_curr
         #     logger.info(f"Usuario {user_id} creó reserva {reserva_id} y se envió WhatsApp")
         # except Exception as twilio_err:
         #     logger.error(f"Error al enviar WhatsApp para reserva {reserva_id}: {str(twilio_err)}")
-
+        #     # No fallamos la request si falla el mensaje
+        
         return nueva_reserva
     except Exception as e:
         logger.error(f"Error en POST /api/reservas para usuario {user_id}: {str(e)}")
@@ -161,9 +162,9 @@ async def get_reservas_pendientes():
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor(cursor_factory=RealDictCursor)
         query = """
-            SELECT r.id, r.fecha_check_in AS fecha_entrada, r.fecha_check_out AS fecha_salida,
-                    r.cantidad_habitaciones AS huespedes, u.email AS contacto,
-                    r.estado, r.precio_total, r.fecha_creacion
+            SELECT r.id, r.usuario_id, r.fecha_check_in, r.fecha_check_out,
+                    r.cantidad_habitaciones, u.email AS contacto,
+                    INITCAP(r.estado) as estado, r.precio_total, r.fecha_creacion
             FROM reservas r
             JOIN usuarios u ON r.usuario_id = u.id
             WHERE r.estado = 'Pendiente'
