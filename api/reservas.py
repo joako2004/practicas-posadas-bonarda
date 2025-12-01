@@ -4,7 +4,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from config.logging_config import logger
 from models.booking import BookingCreate, BookingResponse
-from config.database_operations import execute_query, insert_reserva
+from config.database_operations import execute_query, insert_reserva, delete_reserva
 from config.database_config import get_database_config, validate_database_config
 from api.auth import get_current_active_user
 from dotenv import load_dotenv
@@ -196,3 +196,25 @@ async def get_disponibilidad(start_date: date, end_date: date):
     except Exception as e:
         logger.error(f"Error en GET /api/disponibilidad: {str(e)}")
         raise HTTPException(status_code=500, detail="Error al obtener disponibilidad")
+
+# DELETE /api/reservas/{reserva_id} - Eliminar una reserva
+@router.delete("/reservas/{reserva_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_reserva_endpoint(reserva_id: int, current_user = Depends(get_current_active_user)):
+    user_id = current_user.id
+    try:
+        connection = psycopg2.connect(**DB_CONFIG)
+        cursor = connection.cursor()
+        
+        success = delete_reserva(cursor, connection, reserva_id, user_id)
+        
+        cursor.close()
+        connection.close()
+        
+        if not success:
+            raise HTTPException(status_code=404, detail="Reserva no encontrada o no pertenece al usuario")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error en DELETE /api/reservas/{reserva_id} para usuario {user_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error al eliminar reserva")

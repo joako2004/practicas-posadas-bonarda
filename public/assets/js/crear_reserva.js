@@ -124,6 +124,45 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const fechaOut = formatDate(reserva.fecha_check_out);
 
                 li.textContent = `Tienes una reserva desde la fecha ${fechaIn} hasta la fecha ${fechaOut}`;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Eliminar';
+                deleteBtn.style.marginLeft = '10px';
+                deleteBtn.style.backgroundColor = '#d9534f';
+                deleteBtn.style.color = 'white';
+                deleteBtn.style.border = 'none';
+                deleteBtn.style.padding = '5px 10px';
+                deleteBtn.style.borderRadius = '4px';
+                deleteBtn.style.cursor = 'pointer';
+
+                deleteBtn.addEventListener('click', async () => {
+                    if (confirm('¿Estás seguro de que deseas eliminar esta reserva?')) {
+                        try {
+                            const response = await fetch(`/api/reservas/${reserva.id}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Authorization': `Bearer ${token}`
+                                }
+                            });
+
+                            if (response.ok) {
+                                alert('Reserva eliminada exitosamente.');
+                                li.remove();
+                                if (reservasList.children.length === 0) {
+                                    noReservasMsg.style.display = 'block';
+                                    reservasList.style.display = 'none';
+                                }
+                            } else {
+                                alert('Error al eliminar la reserva.');
+                            }
+                        } catch (error) {
+                            console.error('Error deleting reservation:', error);
+                            alert('Error al eliminar la reserva.');
+                        }
+                    }
+                });
+
+                li.appendChild(deleteBtn);
                 reservasList.appendChild(li);
             });
         }

@@ -172,6 +172,25 @@ def insert_reserva(cursor, connection, usuario_id, fecha_check_in, fecha_check_o
         logger.error(f"❌ Error insertando reserva: {error}")
         return False
 
+def delete_reserva(cursor, connection, reserva_id, usuario_id):
+    """
+    Elimina una reserva de la base de datos
+    """
+    try:
+        # Verificar que la reserva pertenezca al usuario
+        cursor.execute("SELECT id FROM reservas WHERE id = %s AND usuario_id = %s", (reserva_id, usuario_id))
+        if not cursor.fetchone():
+            return False
+
+        cursor.execute("DELETE FROM reservas WHERE id = %s", (reserva_id,))
+        connection.commit()
+        logger.info(f"✅ Reserva {reserva_id} eliminada por usuario {usuario_id}")
+        return True
+    except Exception as error:
+        connection.rollback()
+        logger.error(f"❌ Error eliminando reserva {reserva_id}: {error}")
+        return False
+
 def insert_pago(cursor, connection, reserva_id, tipo_pago, monto, metodo_pago, comprobante=""):
     """
     Inserta un nuevo pago para una reserva
