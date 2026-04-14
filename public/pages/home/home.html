@@ -25,15 +25,11 @@
     html { scroll-behavior: smooth; }
     body { font-family: 'Inter', system-ui, sans-serif; }
     h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; }
-    
-    /* Fade-in effect */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .fade-in {
-      animation: fadeIn 0.5s ease-out forwards;
-    }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
     .fade-in-delay-1 { animation-delay: 0.1s; opacity: 0; }
     .fade-in-delay-2 { animation-delay: 0.2s; opacity: 0; }
     .fade-in-delay-3 { animation-delay: 0.3s; opacity: 0; }
@@ -75,27 +71,73 @@
   </nav>
 
   <!-- Hero Section -->
-  <main class="relative h-screen flex items-center justify-center overflow-hidden">
-    <div class="absolute inset-0 z-0">
-      <img src="/static/assets/images/sala_1.jpg" alt="Posada Bonarda" class="w-full h-full object-cover">
-      <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30"></div>
+  <section class="pt-32 pb-16 px-4">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div class="fade-in">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#2a3222] mb-6">
+            Posadas Bonarda
+          </h1>
+          <p class="text-lg text-[#6a6156] leading-relaxed mb-8">
+            Tu escape rural definitivo - confort, tranquilidad y naturaleza en un solo lugar. 
+            Una posada rodeada de naturaleza donde el tiempo se detiene.
+          </p>
+          <div class="flex flex-wrap gap-4">
+            <a href="/crear_reserva" class="px-8 py-3 rounded-full bg-[#2a3222] text-white font-semibold hover:bg-[#3d4632] transition-all hover:scale-105">
+              ¡RESERVA AHORA!
+            </a>
+            <a href="/sobre_nosotros" class="px-8 py-3 rounded-full border-2 border-[#2a3222] text-[#2a3222] font-semibold hover:bg-[#2a3222] hover:text-white transition-all">
+              Conócenos
+            </a>
+          </div>
+        </div>
+        <div class="fade-in fade-in-delay-1">
+          <img src="/static/assets/images/sala_1.jpg" alt="Posada Bonarda" class="w-full h-80 md:h-96 object-cover rounded-2xl shadow-lg">
+        </div>
+      </div>
     </div>
+  </section>
 
-    <div class="relative z-10 text-center px-4 fade-in">
-      <h1 class="text-5xl md:text-7xl lg:text-8xl font-display font-semibold text-[#DCD6CA] tracking-tight mb-6 text-balance drop-shadow-lg fade-in fade-in-delay-1">
-        Posadas Bonarda
-      </h1>
-      <p class="text-lg md:text-xl text-[#DCD6CA] max-w-xl mx-auto mb-10 text-balance drop-shadow fade-in fade-in-delay-2">
-        Tu escape rural definitivo - confort, tranquilidad y naturaleza en un solo lugar
-      </p>
-      <a href="/crear_reserva" class="inline-block px-8 py-4 rounded-xl bg-[#2a3222] text-white font-semibold text-lg shadow-xl hover:bg-[#3d4632] transition-all hover:scale-105 hover:shadow-2xl fade-in fade-in-delay-3">
-        ¡RESERVA AHORA!
-      </a>
+  <!-- Features -->
+  <section class="py-16 px-4 bg-[#F0F0F0]">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-semibold text-[#2a3222] text-center mb-12 fade-in">
+        ¿Por qué elegirnos?
+      </h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center p-6 bg-white rounded-2xl shadow-sm fade-in">
+          <div class="w-12 h-12 mx-auto mb-4 flex items-center justify-center bg-[#bfae8f] rounded-full">
+            <svg class="w-6 h-6 text-[#2a3222]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-[#2a3222] mb-2">Alojamiento exclusivo</h3>
+          <p class="text-[#6a6156]">Capacidad para 16 huéspedes en un entorno íntimo y privado</p>
+        </div>
+        <div class="text-center p-6 bg-white rounded-2xl shadow-sm fade-in fade-in-delay-1">
+          <div class="w-12 h-12 mx-auto mb-4 flex items-center justify-center bg-[#bfae8f] rounded-full">
+            <svg class="w-6 h-6 text-[#2a3222]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-[#2a3222] mb-2">Tranquilidad total</h3>
+          <p class="text-[#6a6156]">Escape del estrés de la ciudad, rodeados de naturaleza y olivos</p>
+        </div>
+        <div class="text-center p-6 bg-white rounded-2xl shadow-sm fade-in fade-in-delay-2">
+          <div class="w-12 h-12 mx-auto mb-4 flex items-center justify-center bg-[#bfae8f] rounded-full">
+            <svg class="w-6 h-6 text-[#2a3222]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v8m-1-1h1M5 12a2 2 0 110-4 2 2 0 010 4zm0 0a2 2 0 012 2v2m0 0V8a2 2 0 00-2-2H5"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-[#2a3222] mb-2">Experiencia auténtica</h3>
+          <p class="text-[#6a6156]">La calidez de la hospitalidad mendocina</p>
+        </div>
+      </div>
     </div>
-  </main>
+  </section>
 
   <!-- Footer -->
-  <footer class="absolute bottom-0 left-0 right-0 py-4 bg-[#bfae8f]">
+  <footer class="py-8 bg-[#bfae8f]">
     <div class="max-w-7xl mx-auto px-4 text-center">
       <p class="text-sm text-[#2a3222]">
         www.bonardaposadas.com
