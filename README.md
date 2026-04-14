@@ -59,26 +59,26 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 ```
 .
-├── api/                    # Endpoints de la API
-│   ├── auth.py           # Autenticación JWT
-│   ├── crear_usuario.py # Registro de usuarios
-│   ├── autenticar_creacion_usuario.py  # Login
-│   ├── reservas.py      # Gestión de reservas
-│   └── usuarios.py    # Administración de usuarios
-├── config/                # Configuración
-│   ├── database_config.py        # Configuración de BD
-│   ├── database_operations.py  # Operaciones de BD
-│   ├── database_initialization.py  # Inicialización de tablas
-│   └── logging_config.py    # Logging
-├── models/                # Modelos Pydantic
+├── api/                                    # Endpoints de la API
+│   ├── auth.py                             # Autenticación JWT
+│   ├── crear_usuario.py                    # Registro de usuarios
+│   ├── autenticar_creacion_usuario.py      # Login
+│   ├── reservas.py                         # Gestión de reservas
+│   └── usuarios.py                         # Administración de usuarios
+├── config/                                 # Configuración
+│   ├── database_config.py                  # Configuración de BD
+│   ├── database_operations.py              # Operaciones de BD
+│   ├── database_initialization.py          # Inicialización de tablas
+│   └── logging_config.py                   # Logging
+├── models/                                 # Modelos Pydantic
 │   ├── user.py
 │   ├── booking.py
 │   └── ...
-├── public/                # Frontend estático
-│   ├── pages/           # Páginas HTML
-│   └── assets/         # CSS, JS, imágenes
-├── main.py              # Punto de entrada
-└── requirements.txt    # Dependencias
+├── public/                                 # Frontend estático
+│   ├── pages/                              # Páginas HTML
+│   └── assets/                             # CSS, JS, imágenes
+├── main.py                                 # Punto de entrada
+└── requirements.txt                        # Dependencias
 ```
 
 ## Base de Datos
