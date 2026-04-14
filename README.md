@@ -164,6 +164,11 @@ initialize_posada_system(cursor, connection)
 - **Títulos**: Playfair Display (serif, elegante)
 - **Texto general**: Inter (sans-serif, moderna)
 
+### Estructura de Página
+- **Home**: Hero + features cards
+- **Sobre Nosotros / Galería**: Grid dos columnas
+- **Crear Reserva / Registro**: Formularios centrado
+
 ### Efectos
 - Fade-in en carga de páginas (`fade-in`, `fade-in-delay-1/2/3`)
 - Hover con escala en navegación (`hover:scale-105`)
