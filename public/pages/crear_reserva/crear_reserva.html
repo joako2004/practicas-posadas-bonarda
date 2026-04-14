@@ -1,40 +1,127 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/assets/css/crear_reserva.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <title>Crear Reservas</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Reserva - Bonarda Posadas</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+  <style>
+    @theme {
+      --color-beige: #bfae8f;
+      --color-beige-light: #DCD6CA;
+      --color-beige-medium: #938C74;
+      --color-text: #6a6156;
+      --color-text-light: #747C6C;
+      --color-bg: #f6f4f1;
+      --color-bg-alt: #F0F0F0;
+      --color-green: #2a3222;
+      --color-green-light: #747C6C;
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-display: 'Playfair Display', Georgia, serif;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+  </style>
 </head>
+<body class="bg-[#f6f4f1] text-[#6a6156] min-h-screen flex flex-col">
+  
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+    <div class="bg-[#bfae8f]/90 backdrop-blur-md rounded-full px-6 py-3 flex items-center justify-between shadow-lg">
+      <a href="/" class="text-xl font-semibold tracking-[0.2em] text-[#2a3222] hover:opacity-70 transition-opacity">
+        BONARDA
+      </a>
 
-<body>
-    <h1>Gestión de Reservas de la Posada</h1>
-    <button id="logout-btn">Cerrar Sesión</button>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="/" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Inicio</a>
+        <a href="/sobre_nosotros" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Sobre Nosotros</a>
+        <a href="/galeria" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Galería</a>
+        <a href="/crear_reserva" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Reservas</a>
+        <button id="logout-btn" class="px-5 py-2 rounded-full bg-[#2a3222] text-white text-sm font-semibold hover:bg-[#3d4632] transition-all">
+          Cerrar Sesión
+        </button>
+      </div>
 
-    <section>
-        <h2>Tus Reservas</h2>
-        <p id="no-reservas">No tienes reservas aún.</p>
-        <ul id="reservas"></ul>
-    </section>
+      <button class="md:hidden p-2" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
 
-    <section>
-        <h2>Crear Nueva Reserva</h2>
-        <form id="reserva-form">
-            <label>Fecha de Entrada:</label>
-            <input type="date" name="fecha_check_in" required min="">
-            <label>Fecha de Salida:</label>
-            <input type="date" name="fecha_check_out" required>
-            <label>Cantidad de habitaciones:</label>
-            <input type="number" name="cantidad_habitaciones" min="1" max="4" required>
-            <button type="submit">Enviar Reserva</button>
+    <div id="mobile-menu" class="hidden md:hidden bg-[#bfae8f]/90 backdrop-blur-md rounded-2xl mt-2 p-4 shadow-lg">
+      <a href="/" class="block py-2 text-sm font-medium">Inicio</a>
+      <a href="/sobre_nosotros" class="block py-2 text-sm font-medium">Sobre Nosotros</a>
+      <a href="/galeria" class="block py-2 text-sm font-medium">Galería</a>
+      <button id="logout-btn-mobile" class="block py-2 text-sm font-medium text-[#2a3222]">Cerrar Sesión</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="flex-1 py-24 px-4">
+    <div class="max-w-4xl mx-auto space-y-8">
+      
+      <div class="text-center fade-in">
+        <h1 class="text-4xl font-semibold text-[#2a3222] mb-2">Gestión de Reservas</h1>
+        <p class="text-[#747C6C]">Tu escape rural te espera</p>
+      </div>
+
+      <!-- Tus Reservas -->
+      <div class="bg-[#F0F0F0] rounded-2xl shadow-xl border border-[#DCD6CA] p-6 fade-in">
+        <h2 class="text-xl font-semibold mb-4 text-[#2a3222]">Tus Reservas</h2>
+        <p id="no-reservas" class="text-[#747C6C] text-center py-8">No tienes reservas aún.</p>
+        <ul id="reservas" class="space-y-4"></ul>
+      </div>
+
+      <!-- Crear Nueva Reserva -->
+      <div class="bg-[#F0F0F0] rounded-2xl shadow-xl border border-[#DCD6CA] p-6 fade-in">
+        <h2 class="text-xl font-semibold mb-6 text-[#2a3222]">Crear Nueva Reserva</h2>
+        
+        <form id="reserva-form" class="space-y-5">
+          <div class="grid md:grid-cols-2 gap-5">
+            <div>
+              <label for="fecha_check_in" class="block text-sm font-medium text-[#6a6156] mb-2">Fecha de Entrada</label>
+              <input type="text" id="fecha_check_in" name="fecha_check_in" required
+                class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+              >
+            </div>
+            <div>
+              <label for="fecha_check_out" class="block text-sm font-medium text-[#6a6156] mb-2">Fecha de Salida</label>
+              <input type="text" id="fecha_check_out" name="fecha_check_out" required
+                class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+              >
+            </div>
+          </div>
+
+          <div>
+            <label for="cantidad_habitaciones" class="block text-sm font-medium text-[#6a6156] mb-2">Cantidad de Habitaciones</label>
+            <select id="cantidad_habitaciones" name="cantidad_habitaciones" required
+              class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+            >
+              <option value="1">1 Habitación</option>
+              <option value="2">2 Habitaciones</option>
+              <option value="3">3 Habitaciones</option>
+              <option value="4">4 Habitaciones</option>
+            </select>
+          </div>
+
+          <button type="submit" class="w-full h-12 rounded-xl bg-[#2a3222] text-white font-semibold hover:bg-[#3d4632] transition-all hover:scale-[1.02] shadow-lg">
+            CREAR RESERVA
+          </button>
         </form>
-    </section>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
-    <script src="/static/assets/js/crear_reserva.js?v=3"></script>
-</body>
+      </div>
+    </div>
+  </main>
 
+  <script src="/static/assets/js/crear_reserva.js?v=3"></script>
+</body>
 </html>

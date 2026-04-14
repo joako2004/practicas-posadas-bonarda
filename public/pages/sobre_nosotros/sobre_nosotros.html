@@ -1,159 +1,197 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/assets/css/sobre_nosotros.css">
-    <title>Sobre Nosotros - Bonarda Posadas</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sobre Nosotros - Bonarda Posadas</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @theme {
+      --color-beige: #bfae8f;
+      --color-beige-light: #DCD6CA;
+      --color-beige-medium: #938C74;
+      --color-text: #6a6156;
+      --color-text-light: #747C6C;
+      --color-bg: #f6f4f1;
+      --color-bg-alt: #F0F0F0;
+      --color-green: #2a3222;
+      --color-green-light: #747C6C;
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-display: 'Playfair Display', Georgia, serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+  </style>
 </head>
-<body>
-    <nav class="nav-bar">
-        <div class="brand">BONARDA</div>
-        
-        <ul class="nav-menu">
-            <li><a href="static/pages/home/home.html">Inicio</a></li>
-            <li><a href="#posada">La Posada</a></li>
-            <li><a href="#galeria">Galería</a></li>
-            <li><a href="/crear_usuario">Reservas</a></li>
-            <li><a href="#contacto">Contacto</a></li>
-            <li><a href="#resenas">Reseñas</a></li>
-        </ul>
-        
-        <a href="/crear_usuario" class="login-button">Iniciar sesión</a>
-    </nav>
+<body class="bg-[#f6f4f1] text-[#6a6156] min-h-screen">
+  
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+    <div class="bg-[#bfae8f]/90 backdrop-blur-md rounded-full px-6 py-3 flex items-center justify-between shadow-lg">
+      <a href="/" class="text-xl font-semibold tracking-[0.2em] text-[#2a3222] hover:opacity-70 transition-opacity">
+        BONARDA
+      </a>
 
-    <!-- Sección Historia - Pantalla completa -->
-    <section class="history-section">
-        <div class="history-container">
-            <div class="history-content">
-                <h1>Nuestra Historia</h1>
-                
-                <div class="history-text">
-                    <p>
-                        Posadas Bonarda nació del sueño de Alida, quien decidió dar vida a un espacio donde la tranquilidad y la naturaleza fueran protagonistas. En su quinta rodeada de olivos en San Rafael, Mendoza, encontró el lugar ideal para crear una posada con esencia propia.
-                    </p>
-                    
-                    <p>
-                        Inspirada en los valores de la hospitalidad y el buen vivir, Alida transformó esta propiedad familiar en un refugio acogedor pensado para adultos que buscan calma, privacidad y experiencias auténticas.
-                    </p>
-                    
-                    <p>
-                        Así, cada rincón de Posadas Bonarda refleja la historia de quien lo creó: respeto por la tierra, atención personalizada y un ambiente sereno donde el tiempo parece detenerse.
-                    </p>
-                    
-                    <p>
-                        Hoy, Posadas Bonarda sigue siendo fiel a ese espíritu. Con capacidad para alojar cómodamente a 16 personas y recibir hasta 25 en almuerzos o cenas especiales, la posada conserva su mística entre olivos y paisajes mendocinos.
-                    </p>
-                </div>
-            </div>
-            
-            <div class="images-container">
-                <div class="image-placeholder" id="image-1">
-                    <img src="/static/assets/images/campo_6.jpg" alt="">
-                </div>
-                <div class="image-placeholder" id="image-2">
-                    <img src="/static/assets/images/campo_7.jpg" alt="">
-                </div>
-                <div class="image-placeholder large" id="image-3">
-                    <img src="/static/assets/images/campo_3.jpg" alt="">
-                </div>
-            </div>
-        </div>
-    </section>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="/" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Inicio</a>
+        <a href="/sobre_nosotros" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Sobre Nosotros</a>
+        <a href="/galeria" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Galería</a>
+        <a href="/crear_reserva" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Reservas</a>
+        <a href="/crear_usuario" class="px-5 py-2 rounded-full bg-[#2a3222] text-white text-sm font-semibold hover:bg-[#747C6C] transition-all">
+          [Iniciar Sesión]
+        </a>
+      </div>
 
-    <!-- Sección Servicios - Pantalla completa -->
-    <section class="services-section">
-        <div class="services-container">
-            <h2 class="services-title">Servicios</h2>
-            
-            <div class="services-grid">
-                <div class="service-item">
-                    <div class="service-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40">
-                            <path d="M9 11H15L13 13.5L11 13.5L9 11Z"/>
-                            <path d="M12 3L14.5 8.5L20 9L15.5 13L17 19L12 16L7 19L8.5 13L4 9L9.5 8.5L12 3Z" fill="currentColor" opacity="0.3"/>
-                            <circle cx="12" cy="12" r="1.5"/>
-                        </svg>
-                    </div>
-                    <div class="service-name">Limpieza</div>
-                </div>
-                
-                <div class="service-item">
-                    <div class="service-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                            <line x1="8" y1="21" x2="16" y2="21"/>
-                            <line x1="12" y1="17" x2="12" y2="21"/>
-                            <path d="M6 7H18V13H6Z" fill="currentColor" opacity="0.2"/>
-                        </svg>
-                    </div>
-                    <div class="service-name">Piscina</div>
-                </div>
-                
-                <div class="service-item">
-                    <div class="service-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40">
-                            <path d="M5 12.55C5 12.55 7.5 7.5 12 7.5S19 12.55 19 12.55"/>
-                            <path d="M7.5 14.15C7.5 14.15 9.5 10.5 12 10.5S16.5 14.15 16.5 14.15"/>
-                            <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
-                        </svg>
-                    </div>
-                    <div class="service-name">Wi-Fi</div>
-                </div>
-                
-                <div class="service-item">
-                    <div class="service-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                            <line x1="8" y1="21" x2="16" y2="21"/>
-                            <line x1="12" y1="17" x2="12" y2="21"/>
-                            <rect x="4" y="5" width="16" height="10" fill="currentColor" opacity="0.1"/>
-                        </svg>
-                    </div>
-                    <div class="service-name">Tv</div>
-                </div>
-            </div>
-        </div>
-    </section>
+      <button class="md:hidden p-2" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
 
-    <!-- Footer -->
-    <footer class="footer-section">
-        <div class="footer-container">
-            <div class="social-links">
-                <a href="#" class="social-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                        <circle cx="8" cy="9" r="2"/>
-                        <path d="M14 15L20 9"/>
-                        <path d="M2 21L7 16L13 10L22 2"/>
-                    </svg>
-                </a>
-                <a href="#" class="social-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                        <rect x="8" y="8" width="8" height="5" fill="currentColor" opacity="0.3"/>
-                        <path d="M22 6L12 13L2 6"/>
-                    </svg>
-                </a>
-                <a href="#" class="social-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                        <path d="M22 16.92V19A2 2 0 0 1 20.11 21C10.46 21.36 2.36 13.26 2 3.09A2 2 0 0 1 3 1.11H6.08A2 2 0 0 1 8.12 2.84L9 6.5A2 2 0 0 1 8.5 8.61L7 10A16 16 0 0 0 14 17L15.39 15.5A2 2 0 0 1 17.61 15L20.16 15.88A2 2 0 0 1 22 16.92Z"/>
-                        <circle cx="15" cy="7" r="1" fill="currentColor"/>
-                    </svg>
-                </a>
-            </div>
-            
-            <div class="footer-center">
-                <p class="copyright">Copyright Posada Bonarda - 2025. Todos los derechos reservados.</p>
-            </div>
-            
-            <div class="footer-info">
-                <p><strong>Contáctanos</strong></p>
-                <p>123456789</p>
-                <p>email@posada.com</p>
-                <p>Las Vírgenes 3505</p>
-            </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-[#bfae8f]/90 backdrop-blur-md rounded-2xl mt-2 p-4 shadow-lg">
+      <a href="/" class="block py-2 text-sm font-medium">Inicio</a>
+      <a href="/sobre_nosotros" class="block py-2 text-sm font-medium">Sobre Nosotros</a>
+      <a href="/galeria" class="block py-2 text-sm font-medium">Galería</a>
+      <a href="/crear_reserva" class="block py-2 text-sm font-medium">Reservas</a>
+      <a href="/crear_usuario" class="block py-2 text-sm font-medium text-[#2a3222]">Iniciar Sesión</a>
+    </div>
+  </nav>
+
+  <!-- Historia Section -->
+  <section class="pt-32 pb-16 px-4">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div class="fade-in">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-semibold text-[#2a3222] mb-6">
+            Nuestra Historia
+          </h1>
+          <div class="space-y-5 text-[#6a6156] leading-relaxed">
+            <p>
+              Posadas Bonarda nació del sueño de Alida, quien decidió dar vida a un espacio donde la tranquilidad y la naturaleza fueran protagonistas. En su quinta rodeada de olivos en San Rafael, Mendoza, encontró el lugar ideal para crear una posada con esencia propia.
+            </p>
+            <p>
+              Inspirada en los valores de la hospitalidad y el buen vivir, Alida transformó esta propiedad familiar en un refugio acogedor pensado para adultos que buscan calma, privacidad y experiencias auténticas.
+            </p>
+            <p>
+              Así, cada rincón de Posadas Bonarda refleja la historia de quien lo creó: respeto por la tierra, atención personalizada y un ambiente sereno donde el tiempo parece detenerse.
+            </p>
+            <p>
+              Hoy, Posadas Bonarda sigue siendo fiel a ese espíritu. Con capacidad para alojar cómodamente a <strong>16 personas</strong> y recibir hasta <strong>25</strong> en almuerzos o cenas especiales, la posada conserva su mística entre olivos y paisajes mendocinos.
+            </p>
+          </div>
         </div>
-    </footer>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-4">
+            <img src="/static/assets/images/campo_6.jpg" alt="Campo" class="w-full h-48 object-cover rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+            <img src="/static/assets/images/campo_7.jpg" alt="Campo" class="w-full h-64 object-cover rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+          </div>
+          <div class="space-y-4 pt-8">
+            <img src="/static/assets/images/campo_3.jpg" alt="Campo" class="w-full h-64 object-cover rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+            <img src="/static/assets/images/pileta_1.jpg" alt="Pileta" class="w-full h-48 object-cover rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Servicios Section -->
+  <section class="py-16 px-4 bg-[#DCD6CA]/30">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-semibold text-center text-[#2a3222] mb-12">
+        Servicios
+      </h2>
+      
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="text-center p-6 rounded-2xl bg-white hover:bg-[#DCD6CA]/20 transition-colors group">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#bfae8f] flex items-center justify-center group-hover:bg-[#3d4632] transition-colors">
+            <svg class="w-8 h-8 text-[#2a3222]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h3 class="font-semibold text-[#2a3222]">Limpieza</h3>
+        </div>
+
+        <div class="text-center p-6 rounded-2xl bg-white hover:bg-[#DCD6CA]/20 transition-colors group">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#bfae8f] flex items-center justify-center group-hover:bg-[#3d4632] transition-colors">
+            <svg class="w-8 h-8 text-[#2a3222]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.9 3.999A4 4 0 003 15z"/>
+            </svg>
+          </div>
+          <h3 class="font-semibold text-[#2a3222]">Piscina</h3>
+        </div>
+
+        <div class="text-center p-6 rounded-2xl bg-white hover:bg-[#DCD6CA]/20 transition-colors group">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#bfae8f] flex items-center justify-center group-hover:bg-[#3d4632] transition-colors">
+            <svg class="w-8 h-8 text-[#2a3222]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
+            </svg>
+          </div>
+          <h3 class="font-semibold text-[#2a3222]">Wi-Fi</h3>
+        </div>
+
+        <div class="text-center p-6 rounded-2xl bg-white hover:bg-[#DCD6CA]/20 transition-colors group">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#bfae8f] flex items-center justify-center group-hover:bg-[#3d4632] transition-colors">
+            <svg class="w-8 h-8 text-[#2a3222]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3 class="font-semibold text-[#2a3222]">TV</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contacto -->
+  <section class="py-16 px-4">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-3xl font-semibold text-[#2a3222] mb-4">Contáctanos</h2>
+      <p class="text-[#747C6C] mb-8">Estamos listos para recibirte</p>
+      
+      <div class="grid md:grid-cols-3 gap-6 text-center">
+        <div class="p-4">
+          <p class="font-semibold text-[#2a3222]">Teléfono</p>
+          <p class="text-[#6a6156]">123456789</p>
+        </div>
+        <div class="p-4">
+          <p class="font-semibold text-[#2a3222]">Email</p>
+          <p class="text-[#6a6156]">bonarda@posada.com</p>
+        </div>
+        <div class="p-4">
+          <p class="font-semibold text-[#2a3222]">Dirección</p>
+          <p class="text-[#6a6156]">Las Vírgenes 3505</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-8 px-4 bg-[#DCD6CA]/30 border-t border-[#DCD6CA]">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-[#6a6156]">
+        © 2025 Posada Bonarda. Todos los derechos reservados.
+      </div>
+      <div class="flex gap-4">
+        <a href="#" class="w-10 h-10 rounded-full bg-[#bfae8f] flex items-center justify-center text-[#2a3222] hover:bg-[#3d4632] hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-5 8v2.834m-4.17-4 3.504 3.504M3 20h.01M12 20v-2.834m0 0-3.504-3.504M17.83 16.17A4 4 0 0112 20"/>
+          </svg>
+        </a>
+        <a href="#" class="w-10 h-10 rounded-full bg-[#bfae8f] flex items-center justify-center text-[#2a3222] hover:bg-[#3d4632] hover:text-white transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-5 8v2.834m-4.17-4 3.504 3.504M3 20h.01M12 20v-2.834m0 0-3.504-3.504M17.83 16.17A4 4 0 0112 20"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
 </body>
 </html>

@@ -54,6 +54,33 @@ fastapi, pydantic[email], psycopg2-binary, python-dotenv, bcrypt, PyJWT, uvicorn
 
 Install via: `pip install -r requirements.txt`
 
+## Frontend Design System
+
+The project uses **Tailwind CSS v4** via CDN with a custom color palette based on the original beige/rural theme.
+
+### Color Palette
+- Beige (navbar): `#bfae8f`
+- Green (primary): `#2a3222` (darker tone for better contrast)
+- Green hover: `#3d4632`
+- Text: `#6a6156`
+- Background: `#f6f4f1`
+- Form backgrounds: `#F0F0F0`
+- Borders: `#DCD6CA`
+
+### Typography
+- Headings: **Playfair Display** (serif, elegant)
+- Body: **Inter** (sans-serif, modern)
+
+### Tailwind CDN
+```html
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+```
+
+### Key Classes Used
+- `fade-in`, `fade-in-delay-1/2/3` - Page load animations
+- `hover:scale-105 hover:scale-105 transition-all duration-300` - Navigation hover effects
+- Glassmorphism removed - solid colors now
+
 ## Notes
 
 - App loads `.env` via `load_dotenv()` at module import time in both `main.py` and `config/database_config.py`. Missing variables cause startup failures.

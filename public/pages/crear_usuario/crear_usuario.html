@@ -1,180 +1,178 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Cuenta - Bonarda Posadas</title>
-    <link rel="stylesheet" href="/static/assets/css/crear_cuenta.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Cuenta - Bonarda Posadas</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @theme {
+      --color-beige: #bfae8f;
+      --color-beige-light: #DCD6CA;
+      --color-beige-medium: #938C74;
+      --color-text: #6a6156;
+      --color-text-light: #747C6C;
+      --color-bg: #f6f4f1;
+      --color-bg-alt: #F0F0F0;
+      --color-green: #2a3222;
+      --color-green-light: #747C6C;
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-display: 'Playfair Display', Georgia, serif;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+  </style>
 </head>
-<body>
-<header class="nav-pill" role="navigation">
+<body class="bg-[#f6f4f1] text-[#6a6156] min-h-screen flex flex-col">
+  
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+    <div class="bg-[#bfae8f]/90 backdrop-blur-md rounded-full px-6 py-3 flex items-center justify-between shadow-lg">
+      <a href="/" class="text-xl font-semibold tracking-[0.2em] text-[#2a3222] hover:opacity-70 transition-opacity">
+        BONARDA
+      </a>
 
-    <div class="brand">BONARDA</div>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="/" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Inicio</a>
+        <a href="/sobre_nosotros" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Sobre Nosotros</a>
+        <a href="/galeria" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Galería</a>
+        <a href="/crear_reserva" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Reservas</a>
+        <a href="/crear_usuario" class="px-5 py-2 rounded-full bg-[#2a3222] text-white text-sm font-semibold hover:bg-[#3d4632] transition-all">
+          [Iniciar Sesión]
+        </a>
+      </div>
 
-    <nav class="full-screen-container-nav">
-        <a href="static/pages/home/home.html">Inicio</a>
-        <a href="/sobre_nosotros">Sobre Nosotros</a>
-        <a href="/galeria">Galería</a>
-        <a href="/crear_reserva">Reservas</a>
-        <a href="#">Contacto</a>
-        <a href="#">Reseñas</a>
-        <a class="cta" href="/crear_usuario">[Iniciar Sesión]</a>
-    </nav>
+      <button class="md:hidden p-2" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
 
-</header>
+    <div id="mobile-menu" class="hidden md:hidden bg-[#bfae8f]/90 backdrop-blur-md rounded-2xl mt-2 p-4 shadow-lg">
+      <a href="/" class="block py-2 text-sm font-medium">Inicio</a>
+      <a href="/sobre_nosotros" class="block py-2 text-sm font-medium">Sobre Nosotros</a>
+      <a href="/galeria" class="block py-2 text-sm font-medium">Galería</a>
+      <a href="/crear_reserva" class="block py-2 text-sm font-medium">Reservas</a>
+      <a href="/crear_usuario" class="block py-2 text-sm font-medium text-[#2a3222]">Iniciar Sesión</a>
+    </div>
+  </nav>
 
-        <div class="page-content">
-            <div class="form-container">
-                <div class="form-card">
-                    <h1>CREAR CUENTA</h1>
-                    
-                    <form class="registration-form">
-                        <div class="field-group">
-                            <label for="email">Correo:</label>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-                        
-                        <div class="name-group">
-                            <label>Nombre y Apellido</label>
-                            <div class="name-fields">
-                                <input type="text" id="nombre" name="nombre" placeholder="Nombre" required>
-                                <input type="text" id="apellido" name="apellido" placeholder="Apellido" required>
-                            </div>
-                        </div>
-                        
-                        <div class="field-group">
-                            <label for="dni">DNI</label>
-                            <input type="text" id="dni" name="dni" required>
-                        </div>
-                        
-                        <div class="field-group">
-                            <label for="cuil_cuit">CUIL/CUIT</label>
-                            <input type="text" id="cuil_cuit" name="cuil_cuit" placeholder="XX-XXXXXXXX-X" required>
-                        </div>
-                        
-                        <div class="field-group">
-                            <label for="password">Contraseña</label>
-                            <div class="password-container">
-                                <input type="password" id="password" name="password" required>
-                                <button type="button" class="toggle-password" data-target="password">
-                                    <img src="/static/assets/images/ojo-uno.png" alt="Mostrar contraseña">
-                                </button>
-                            </div>
-                        </div>
+  <!-- Main Content -->
+  <main class="flex-1 flex items-center justify-center py-24 px-4">
+    <div class="w-full max-w-md">
+      <div class="bg-[#F0F0F0] rounded-2xl shadow-xl border border-[#DCD6CA] p-8 fade-in">
+        <h1 class="text-3xl font-semibold text-center mb-8 text-[#2a3222]">Crear Cuenta</h1>
+        
+        <form id="registration-form" class="space-y-5">
+          <div>
+            <label for="email" class="block text-sm font-medium text-[#6a6156] mb-2">Correo</label>
+            <input type="email" id="email" name="email" required
+              class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+            >
+          </div>
 
-                        <div class="field-group">
-                            <label for="confirm-password">Confirmar Contraseña</label>
-                            <div class="password-container">
-                                <input type="password" id="confirm-password" name="confirm-password" required>
-                                <button type="button" class="toggle-password" data-target="confirm-password">
-                                    <img src="/static/assets/images/ojo-uno.png" alt="Mostrar contraseña">
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="field-group">
-                            <label for="telefono">Teléfono</label>
-                            <input type="tel" id="telefono" name="telefono" required>
-                        </div>
-                        
-                        <button type="submit" class="submit-btn">CREAR CUENTA</button>
-
-                        <button type="button" class="submit-btn" id="login-toggle-btn" onclick="window.location.href='/login'">YA TENGO CUENTA</button>
-                    </form>
-                    
-                </div>
-                
-                <div class="form-card login-form" style="display: none;">
-                    <h1>INICIAR SESIÓN</h1>
-                    <form id="login-form">
-                        <div class="field-group">
-                            <label for="login-dni">DNI</label>
-                            <input type="text" id="login-dni" name="login-dni" required>
-                        </div>
-                        <div class="field-group">
-                            <label for="login-password">Contraseña</label>
-                            <input type="password" id="login-password" name="login-password" required>
-                        </div>
-                        <button type="submit" class="submit-btn">INICIAR SESIÓN</button>
-                        <button type="button" class="submit-btn" id="register-toggle-btn">CREAR CUENTA</button>
-                    </form>
-                </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="nombre" class="block text-sm font-medium text-[#6a6156] mb-2">Nombre</label>
+              <input type="text" id="nombre" name="nombre" placeholder="Nombre" required
+                class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+              >
             </div>
-        </div>
-    <style>
-        .password-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
+            <div>
+              <label for="apellido" class="block text-sm font-medium text-[#6a6156] mb-2">Apellido</label>
+              <input type="text" id="apellido" name="apellido" placeholder="Apellido" required
+                class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+              >
+            </div>
+          </div>
 
-        .password-container input {
-            flex: 1;
-            padding-right: 50px; /* Space for the button */
-        }
+          <div>
+            <label for="dni" class="block text-sm font-medium text-[#6a6156] mb-2">DNI</label>
+            <input type="text" id="dni" name="dni" required
+              class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+            >
+          </div>
 
-        .toggle-password {
-            position: absolute;
-            right: 10px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+          <div>
+            <label for="cuil_cuit" class="block text-sm font-medium text-[#6a6156] mb-2">CUIL/CUIT</label>
+            <input type="text" id="cuil_cuit" name="cuil_cuit" placeholder="XX-XXXXXXXX-X" required
+              class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+            >
+          </div>
 
-        .toggle-password img {
-            width: 16px;
-            height: 16px;
-        }
-    </style>
+          <div>
+            <label for="password" class="block text-sm font-medium text-[#6a6156] mb-2">Contraseña</label>
+            <div class="relative">
+              <input type="password" id="password" name="password" required
+                class="w-full h-12 px-4 pr-12 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+              >
+              <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 p-2" data-target="password">
+                <img src="/static/assets/images/ojo-uno.png" alt="Mostrar" class="w-4 h-4">
+              </button>
+            </div>
+          </div>
 
-    <script>
-        function togglePasswordVisibility(targetId) {
-            const input = document.getElementById(targetId);
-            const button = document.querySelector(`[data-target="${targetId}"]`);
-            const img = button.querySelector('img');
+          <div>
+            <label for="confirm-password" class="block text-sm font-medium text-[#6a6156] mb-2">Confirmar Contraseña</label>
+            <div class="relative">
+              <input type="password" id="confirm-password" name="confirm-password" required
+                class="w-full h-12 px-4 pr-12 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+              >
+              <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 p-2" data-target="confirm-password">
+                <img src="/static/assets/images/ojo-uno.png" alt="Mostrar" class="w-4 h-4">
+              </button>
+            </div>
+          </div>
 
-            if (input && button && img) {
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    img.src = '/static/assets/images/ojo-dos.png';
-                    img.alt = 'Ocultar contraseña';
-                } else {
-                    input.type = 'password';
-                    img.src = '/static/assets/images/ojo-uno.png';
-                    img.alt = 'Mostrar contraseña';
-                }
-            }
-        }
+          <div>
+            <label for="telefono" class="block text-sm font-medium text-[#6a6156] mb-2">Teléfono</label>
+            <input type="tel" id="telefono" name="telefono" required
+              class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+            >
+          </div>
 
-        // Add event listeners to toggle buttons
-        document.addEventListener('DOMContentLoaded', function() {
-            const toggleButtons = document.querySelectorAll('.toggle-password');
-            toggleButtons.forEach(button => {
-                button.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    const targetId = this.getAttribute('data-target');
-                    togglePasswordVisibility(targetId);
-                });
-            });
+          <button type="submit" class="w-full h-12 rounded-xl bg-[#2a3222] text-white font-semibold hover:bg-[#3d4632] transition-all hover:scale-[1.02] shadow-lg">
+            CREAR CUENTA
+          </button>
 
-            // Toggle between registration and login forms (only for register toggle button)
-            const registerToggleBtn = document.getElementById('register-toggle-btn');
-            const registrationForm = document.querySelector('.form-card:not(.login-form)');
-            const loginForm = document.querySelector('.login-form');
+          <button type="button" id="login-toggle-btn" class="w-full h-12 rounded-xl border-2 border-[#2a3222] text-[#2a3222] font-semibold hover:bg-[#2a3222]/5 transition-all">
+            YA TENGO CUENTA
+          </button>
+        </form>
 
-            if (registerToggleBtn) {
-                registerToggleBtn.addEventListener('click', function() {
-                    loginForm.style.display = 'none';
-                    registrationForm.style.display = 'block';
-                });
-            }
-        });
-    </script>
-    <script src="/static/assets/js/crear_cuenta.js"></script>
+        <form id="login-form" class="space-y-5 hidden mt-6 pt-6 border-t border-[#DCD6CA]">
+          <div>
+            <label for="login-dni" class="block text-sm font-medium text-[#6a6156] mb-2">DNI</label>
+            <input type="text" id="login-dni" name="login-dni" required
+              class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+            >
+          </div>
+
+          <div>
+            <label for="login-password" class="block text-sm font-medium text-[#6a6156] mb-2">Contraseña</label>
+            <input type="password" id="login-password" name="login-password" required
+              class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+            >
+          </div>
+
+          <button type="submit" class="w-full h-12 rounded-xl bg-[#2a3222] text-white font-semibold hover:bg-[#3d4632] transition-all hover:scale-[1.02] shadow-lg">
+            INICIAR SESIÓN
+          </button>
+
+          <button type="button" id="register-toggle-btn" class="w-full h-12 rounded-xl border-2 border-[#2a3222] text-[#2a3222] font-semibold hover:bg-[#2a3222]/5 transition-all">
+            CREAR CUENTA
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="/static/assets/js/crear_cuenta.js"></script>
 </body>
 </html>

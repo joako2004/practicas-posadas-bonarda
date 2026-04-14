@@ -147,7 +147,27 @@ initialize_posada_system(cursor, connection)
 - **Backend**: FastAPI, Pydantic, psycopg2
 - **Base de datos**: PostgreSQL
 - **Autenticación**: PyJWT, bcrypt
-- **Frontend**: HTML/CSS/JS vanilla
+- **Frontend**: HTML, **Tailwind CSS v4** (CDN), JavaScript vanilla
+
+## Diseño Visual
+
+### Paleta de Colores
+- Beige (navbar): `#bfae8f`
+- Verde oscuro: `#2a3222`
+- Verde hover: `#3d4632`
+- Texto: `#6a6156`
+- Fondo: `#f6f4f1`
+- Formularios: `#F0F0F0`
+- Bordes: `#DCD6CA`
+
+### Tipografías
+- **Títulos**: Playfair Display (serif, elegante)
+- **Texto general**: Inter (sans-serif, moderna)
+
+### Efectos
+- Fade-in en carga de páginas (`fade-in`, `fade-in-delay-1/2/3`)
+- Hover con escala en navegación (`hover:scale-105`)
+- Transiciones suaves (`transition-all duration-300`)
 
 ## Licencia
 

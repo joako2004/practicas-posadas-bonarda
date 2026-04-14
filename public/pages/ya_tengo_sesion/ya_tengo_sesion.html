@@ -1,27 +1,69 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/public/assets/js/ya_tengo_sesion.js"></script>
-
-    <title>Iniciar Sesión</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión - Bonarda Posadas</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="/static/assets/js/ya_tengo_sesion.js"></script>
+  <style>
+    @theme {
+      --color-beige: #bfae8f;
+      --color-beige-light: #DCD6CA;
+      --color-beige-medium: #938C74;
+      --color-text: #6a6156;
+      --color-text-light: #747C6C;
+      --color-bg: #f6f4f1;
+      --color-bg-alt: #F0F0F0;
+      --color-green: #2a3222;
+      --color-green-light: #747C6C;
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-display: 'Playfair Display', Georgia, serif;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    h1 { font-family: 'Playfair Display', Georgia, serif; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+  </style>
 </head>
-<body>
-    <h1>Iniciar Sesión</h1>
-    
-    <form id="loginForm">
-        <div>
-            <label for="dni">DNI:</label>
-            <input type="text" id="dni" name="dni" required>
-        </div>
+<body class="bg-[#f6f4f1] text-[#6a6156] min-h-screen flex flex-col">
+  
+  <nav class="fixed top-0 left-0 right-0 z-50 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+    <div class="bg-[#bfae8f]/90 backdrop-blur-md rounded-full px-6 py-3 flex items-center justify-between shadow-lg">
+      <a href="/" class="text-xl font-semibold tracking-[0.2em] text-[#2a3222] hover:opacity-70 transition-opacity">BONARDA</a>
+    </div>
+  </nav>
+
+  <main class="flex-1 flex items-center justify-center py-24 px-4">
+    <div class="w-full max-w-md">
+      <div class="bg-[#F0F0F0] rounded-2xl shadow-xl border border-[#DCD6CA] p-8 fade-in">
+        <h1 class="text-3xl font-semibold text-center mb-8 text-[#2a3222]">Iniciar Sesión</h1>
         
-        <div>
-            <label for="password">Contraseña:</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        
-        <button type="submit">Iniciar Sesión</button>
-    </form>
+        <form id="loginForm" class="space-y-5">
+          <div>
+            <label for="dni" class="block text-sm font-medium text-[#6a6156] mb-2">DNI</label>
+            <input type="text" id="dni" name="dni" required
+              class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+            >
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-[#6a6156] mb-2">Contraseña</label>
+            <input type="password" id="password" name="password" required
+              class="w-full h-12 px-4 rounded-lg border border-[#DCD6CA] bg-white text-[#6a6156] focus:bg-white focus:border-[#2a3222] focus:ring-2 focus:ring-[#2a3222]/20 transition-all outline-none"
+            >
+          </div>
+
+          <button type="submit" class="w-full h-12 rounded-xl bg-[#2a3222] text-white font-semibold hover:bg-[#3d4632] transition-all hover:scale-[1.02] shadow-lg">
+            INICIAR SESIÓN
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
 </body>
 </html>

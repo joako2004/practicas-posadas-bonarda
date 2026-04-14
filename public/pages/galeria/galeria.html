@@ -1,86 +1,152 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="static/assets/css/galeria.css">
-    <title>Galería</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galería - Bonarda Posadas</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @theme {
+      --color-beige: #bfae8f;
+      --color-beige-light: #DCD6CA;
+      --color-beige-medium: #938C74;
+      --color-text: #6a6156;
+      --color-text-light: #747C6C;
+      --color-bg: #f6f4f1;
+      --color-bg-alt: #F0F0F0;
+      --color-green: #2a3222;
+      --color-green-light: #747C6C;
+      --font-sans: 'Inter', system-ui, sans-serif;
+      --font-display: 'Playfair Display', Georgia, serif;
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    .gallery-grid { columns: 1; }
+    @media (min-width: 640px) { .gallery-grid { columns: 2; } }
+    @media (min-width: 1024px) { .gallery-grid { columns: 3; } }
+    .gallery-item { break-inside: avoid; margin-bottom: 1rem; }
+  </style>
 </head>
-<body>
-    <header class="nav-pill" role="navigation">
-      <div class="brand">BONARDA</div>
-      <nav style="display:flex;gap:18px;align-items:center">
-        <a href="static/pages/home/home.html">Inicio</a>
-        <a href="/sobre_nosotros">La Posada</a>
-        <a href="/galeria">Galería</a>
-        <a href="/crear_reserva">Reservas</a>
-        <a href="#">Contacto</a>
-        <a href="#">Reseñas</a>
-        <a class="cta" href="/crear_usuario">[Iniciar sesión]</a>
-      </nav>
-    </header>
-    <h1 class="gallery-title">Galería</h1>
-    <div class="gallery">
-        <div class="gallery-item tall">
-            <img src="static/assets/images/bano_1.jpg" alt="Baño 1">
-        </div>
-        <div class="gallery-item">
-            <img src="static/assets/images/campo_1.jpg" alt="Campo 1">
-        </div>
-        <div class="gallery-item wide">
-            <img src="static/assets/images/campo_2.jpg" alt="Campo 2">
-        </div>
-        <div class="gallery-item">
-            <img src="static/assets/images/campo_3.jpg" alt="Campo 3">
-        </div>
-        <div class="gallery-item tall">
-            <img src="static/assets/images/campo_4.jpg" alt="Campo 4">
-        </div>
-        <div class="gallery-item">
-            <img src="static/assets/images/campo_5.jpg" alt="Campo 5">
-        </div>
-        <div class="gallery-item wide">
-            <img src="static/assets/images/campo_6.jpg" alt="Campo 6">
-        </div>
-        <div class="gallery-item">
-            <img src="static/assets/images/campo_7.jpg" alt="Campo 7">
-        </div>
-        <div class="gallery-item">
-            <img src="static/assets/images/campo_8.jpg" alt="Campo 8">
-        </div>
-        <div class="gallery-item tall">
-            <img src="static/assets/images/comedor_1.jpg" alt="Comedor 1">
-        </div>
-        <div class="gallery-item">
-            <img src="static/assets/images/comedor_2.jpg" alt="Comedor 2">
-        </div>
-        <div class="gallery-item">
-            <img src="static/assets/images/desayuno_1.jpg" alt="Desayuno 1">
-        </div>
-        <div class="gallery-item wide">
-            <img src="static/assets/images/habitacion_1.jpg" alt="Habitación 1">
-        </div>
-        <div class="gallery-item">
-            <img src="static/assets/images/habitacion_2.jpg" alt="Habitación 2">
-        </div>
-        <div class="gallery-item">
-            <img src="static/assets/images/habitacion_3.jpg" alt="Habitación 3">
-        </div>
-        <div class="gallery-item tall">
-            <img src="static/assets/images/habitacion_4.jpg" alt="Habitación 4">
-        </div>
-        <div class="gallery-item">
-            <img src="static/assets/images/habitacion_5.jpg" alt="Habitación 5">
-        </div>
-        <div class="gallery-item">
-            <img src="static/assets/images/habitacion_6.jpg" alt="Habitación 6">
-        </div>
-        <div class="gallery-item wide">
-            <img src="static/assets/images/habitacion_7.jpg" alt="Habitación 7">
-        </div>
-        <div class="gallery-item">
-            <img src="static/assets/images/pileta_1.jpg" alt="Pileta 1">
-        </div>
+<body class="bg-[#f6f4f1] text-[#6a6156] min-h-screen">
+  
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
+    <div class="bg-[#bfae8f]/90 backdrop-blur-md rounded-full px-6 py-3 flex items-center justify-between shadow-lg">
+      <a href="/" class="text-xl font-semibold tracking-[0.2em] text-[#2a3222] hover:opacity-70 transition-opacity">
+        BONARDA
+      </a>
+
+      <div class="hidden md:flex items-center gap-8">
+        <a href="/" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Inicio</a>
+        <a href="/sobre_nosotros" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Sobre Nosotros</a>
+        <a href="/galeria" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Galería</a>
+        <a href="/crear_reserva" class="text-sm font-medium text-[#2a3222] hover:text-[#3d4632] hover:scale-105 transition-all duration-300">Reservas</a>
+        <a href="/crear_usuario" class="px-5 py-2 rounded-full bg-[#2a3222] text-white text-sm font-semibold hover:bg-[#747C6C] transition-all">
+          [Iniciar Sesión]
+        </a>
+      </div>
+
+      <button class="md:hidden p-2" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
     </div>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-[#bfae8f]/90 backdrop-blur-md rounded-2xl mt-2 p-4 shadow-lg">
+      <a href="/" class="block py-2 text-sm font-medium">Inicio</a>
+      <a href="/sobre_nosotros" class="block py-2 text-sm font-medium">Sobre Nosotros</a>
+      <a href="/galeria" class="block py-2 text-sm font-medium">Galería</a>
+      <a href="/crear_reserva" class="block py-2 text-sm font-medium">Reservas</a>
+      <a href="/crear_usuario" class="block py-2 text-sm font-medium text-[#2a3222]">Iniciar Sesión</a>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="pt-32 pb-8 px-4 text-center fade-in">
+    <h1 class="text-4xl md:text-5xl font-semibold text-[#2a3222] mb-4">Galería</h1>
+    <p class="text-[#747C6C] max-w-xl mx-auto">Descubre nuestro espacio único en el corazón del campo</p>
+  </header>
+
+  <!-- Gallery -->
+  <main class="px-4 pb-16">
+    <div class="gallery-grid max-w-7xl mx-auto">
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/bano_1.jpg" alt="Baño" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/campo_1.jpg" alt="Campo" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/campo_2.jpg" alt="Campo" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/campo_3.jpg" alt="Campo" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/campo_4.jpg" alt="Campo" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/campo_5.jpg" alt="Campo" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/campo_6.jpg" alt="Campo" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/campo_7.jpg" alt="Campo" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/campo_8.jpg" alt="Campo" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/comedor_1.jpg" alt="Comedor" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/comedor_2.jpg" alt="Comedor" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/desayuno_1.jpg" alt="Desayuno" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/habitacion_1.jpg" alt="Habitación" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/habitacion_2.jpg" alt="Habitación" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/habitacion_3.jpg" alt="Habitación" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/habitacion_4.jpg" alt="Habitación" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/habitacion_5.jpg" alt="Habitación" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/habitacion_6.jpg" alt="Habitación" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/habitacion_7.jpg" alt="Habitación" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/pileta_1.jpg" alt="Pileta" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/pileta_2.jpg" alt="Pileta" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/sala_1.jpg" alt="Sala" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+      <div class="gallery-item group overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-shadow">
+        <img src="/static/assets/images/sala_2.jpg" alt="Sala" class="w-full object-cover transform group-hover:scale-105 transition-transform duration-500">
+      </div>
+    </div>
+  </main>
+
 </body>
 </html>
