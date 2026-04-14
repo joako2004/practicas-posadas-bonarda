@@ -76,6 +76,10 @@ The project uses **Tailwind CSS v4** via CDN with a custom color palette based o
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 ```
 
+### Page Layouts
+- **Standard pages (sobre_nosotros, galeria, etc.)**: Two-column grid with image on right
+- **Home page**: Hero section with title + description + buttons + featured image, followed by features cards section
+
 ### Key Classes Used
 - `fade-in`, `fade-in-delay-1/2/3` - Page load animations
 - `hover:scale-105 hover:scale-105 transition-all duration-300` - Navigation hover effects
