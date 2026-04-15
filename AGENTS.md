@@ -92,6 +92,12 @@ The project uses **Tailwind CSS v4** via CDN with a custom color palette based o
 - `pydantic[email]` is required for `EmailStr` type used in `models/user.py`.
 - Database tables are auto-created on first connection via `config/database_initialization.py`.
 
+## Footer (Home Page)
+
+Located at `public/pages/home/home.html`:
+- **Contacto section**: Links to Instagram, WhatsApp, Gmail
+- **Ubicación section**: Google Maps embed iframe (**NO FUNCIONA** - requiere API key válida de Google Maps)
+
 ---
 
 ### ¿Qué logramos con esto?
